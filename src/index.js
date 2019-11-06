@@ -4,9 +4,11 @@ import { OrbitControls } from './libs/Orbitcontrols';
 
 var container, camera, scene, renderer, hemiLight, directLight;
 var ground;
-let controls;
+let controls, count = 0;
 
 var mixer, clock = new THREE.Clock();
+var player;
+var right = false, left = false;
 
 init();
 animate();
@@ -66,14 +68,14 @@ function init() {
       }
     } );
     object.scale.set( 0.2, 0.2, 0.2 );
-    scene.add( object );
+    player = object;
+    scene.add( player );
   } );
 
   renderer = new THREE.WebGLRenderer( { antialias: true } );
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
   renderer.shadowMap.enabled = true;
-
 
   controls = new OrbitControls( camera, renderer.domElement );
   controls.target.set( 0, 20, 0 );
@@ -83,6 +85,9 @@ function init() {
   container.appendChild( renderer.domElement );
 
   window.addEventListener( 'resize', onWindowResize, false );
+  window.addEventListener( 'keydown', setPressedKey );
+  window.addEventListener( 'keyup', resetPressedKey );
+
 }
 
 function onWindowResize() {
@@ -97,9 +102,69 @@ function animate() {
   var delta = clock.getDelta();
 
   if ( mixer ) {
+    if ( left === true ) {
+      player.position.x += 0.75;
+      player.rotation.y = 0.25 * Math.PI;
+    }
+    if ( right === true ) {
+      player.position.x -= 0.75;
+      player.rotation.y = -0.25 * Math.PI;
+    }
+    if ( !left && !right ) {
+      player.rotation.y = 0;
+
+      ground.material.map.offset.y -= 0.01;
+    } else {
+      ground.material.map.offset.y -= 0.0085;
+    }
+
+    count++;
+    if( count < 10) {
+      console.log(count, );
+    }
+
     mixer.update( delta );
-    ground.material.map.offset.y -= 0.01;
   }
 
   renderer.render( scene, camera );
 }
+
+function setPressedKey( event ) {
+  if ( event.keyCode === 188 ) { // left 37
+    left = true;
+  }
+  if ( event.keyCode === 190 ) { // right 39
+    right = true;
+  }
+}
+
+function resetPressedKey( event ) {
+  if ( event.keyCode === 188 ) { // left 37
+    left = false;
+  }
+  if ( event.keyCode === 190 ) { // right 39
+    right = false;
+  }
+}
+
+// function handleKeyDown(keyEvent){
+// 	if(jumping)return;
+// 	var validMove=true;
+// 	if ( keyEvent.keyCode === 37) {//left
+// 		if(currentLane==middleLane){
+// 			currentLane=leftLane;
+// 		}else if(currentLane==rightLane){
+// 			currentLane=middleLane;
+// 		}else{
+// 			validMove=false;
+// 		}
+// 	} else if ( keyEvent.keyCode === 39) {//right
+// 		if(currentLane==middleLane){
+// 			currentLane=rightLane;
+// 		}else if(currentLane==leftLane){
+// 			currentLane=middleLane;
+// 		}else{
+// 			validMove=false;
+// 		}
+// 	}
+// }
