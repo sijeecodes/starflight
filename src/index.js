@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import { FBXLoader } from './libs/FBXLoader';
+import { OrbitControls } from './libs/Orbitcontrols';
 
 var container, camera, scene, renderer, hemiLight, directLight;
 var ground;
+let controls;
 
 var mixer, clock = new THREE.Clock();
 
@@ -72,6 +74,12 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   renderer.shadowMap.enabled = true;
 
+
+  controls = new OrbitControls( camera, renderer.domElement );
+  controls.target.set( 0, 20, 0 );
+  controls.update();
+
+
   container.appendChild( renderer.domElement );
 
   window.addEventListener( 'resize', onWindowResize, false );
@@ -90,6 +98,7 @@ function animate() {
 
   if ( mixer ) {
     mixer.update( delta );
+    ground.material.map.offset.y -= 0.01;
   }
 
   renderer.render( scene, camera );
