@@ -1,14 +1,15 @@
 import * as THREE from 'three';
 import { FBXLoader } from './libs/FBXLoader';
 import { OrbitControls } from './libs/Orbitcontrols';
+import Stats from './libs/stats.module.js';
 
 var container, camera, scene, renderer, hemiLight, directLight;
-var ground;
-let controls, count = 0;
+var starGeo, stars;
+let controls;
 
-var mixer, clock = new THREE.Clock();
-var player;
-var right = false, left = false;
+var stats, clock = new THREE.Clock();
+var playerGroup;
+var right = false, left = false, up = false, down = false, controlSpeed = 0.3;
 
 init();
 animate();
@@ -18,20 +19,15 @@ function init() {
   document.body.appendChild( container );
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color( 0xa0a0a0 );
-  scene.fog = new THREE.Fog( 0xa0a0a0, 150, 300 );
+  scene.background = new THREE.Color( 0x000000 );
 
-  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-  camera.position.set( 0, 45, -40 );
-  camera.rotation.y = -0.5 * Math.PI;
-  camera.lookAt(0, 30, 0);
+  camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
   // x(+left/-right) y(+high/-low) z(+front/-rear)
 
-  hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444, 1.5 );
+  hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444, 0.8 );
   scene.add( hemiLight );
 
-  directLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
-  // directLight = new THREE.SpotLight( 0xffffff );
+  directLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
   directLight.position.set( 100, 200, 100 );
   directLight.castShadow = true;
   directLight.shadow.mapSize.width = 5120;
@@ -40,47 +36,75 @@ function init() {
   directLight.shadow.camera.left = -200;
   directLight.shadow.camera.top = 80;
   directLight.shadow.camera.right = 80;
-  // directLight.shadow.camera.near = 0.1;
-  // directLight.shadow.camera.far = 2000;
   scene.add( directLight );
 
-  var geometry = new THREE.PlaneGeometry( 1500, 1500, 10, 10 );
-  var texture = new THREE.TextureLoader().load( 'models/grass.jpg' );
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set( 20, 20 );
-  var material = new THREE.MeshPhongMaterial( { map: texture } );
-  ground = new THREE.Mesh( geometry, material );
-  ground.rotation.x = -0.5 * Math.PI;
-  ground.receiveShadow = true;
-  ground.castShadow = false;
-  scene.add( ground );
+  starGeo = new THREE.Geometry();
+  for(let i=0;i<3000;i++) {
+    let star = new THREE.Vector3(
+      Math.random() * 1000 - 500,
+      Math.random() * 1000 - 500,
+      - Math.random() * 1000
+    );
+    star.velocity = 0;
+    star.acceleration = 0.03;
+    starGeo.vertices.push(star);
+  }
+  let sprite = new THREE.TextureLoader().load( 'models/star.png' );
+  let starMaterial = new THREE.PointsMaterial({
+    color: 0xaaaaaa,
+    size: 2,
+    map: sprite
+  });
+  stars = new THREE.Points(starGeo,starMaterial);
+  scene.add(stars);
 
+
+  //
+  // for(let i=0;i<3000;i++) {
+  //   let star = new THREE.Vector3(
+  //     Math.random() * 1000 - 500,
+  //     Math.random() * 1000 - 500,
+  //     Math.random() * 1000 - 500
+  //   );
+  //   star.velocity = 0;
+  //   star.acceleration = 0.03;
+  //   starGeo.vertices.push(star);
+  // }
+  // let sprite = new THREE.TextureLoader().load( 'models/star.png' );
+  // let starMaterial = new THREE.PointsMaterial({
+  //   color: 0xaaaaaa,
+  //   size: 2,
+  //   map: sprite
+  // });
+  // stars = new THREE.Points(starGeo,starMaterial);
+  // scene.add(stars);
+
+
+  // Player space ship + collision check box
+  playerGroup = new THREE.Group();
   var loader = new FBXLoader();
-  loader.load( 'models/run.fbx', function ( object ) {
-    mixer = new THREE.AnimationMixer( object );
-    var action = mixer.clipAction( object.animations[ 0 ] );
-    action.play();
-    object.traverse( function ( child ) {
-      if ( child.isMesh ) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    } );
-    object.scale.set( 0.2, 0.2, 0.2 );
-    player = object;
-    scene.add( player );
+  loader.load( 'models/X.fbx', function ( object ) {
+    object.castShadow = true;
+    playerGroup.add( object );
   } );
 
+  playerGroup.scale.set( 0.8, 0.8, 0.8 );
+  // playerGroup.rotation.x = 0.5 * Math.PI;
+  playerGroup.position.set( 0, 0, -20 );
+  scene.add( playerGroup );
+
+  // Render
   renderer = new THREE.WebGLRenderer( { antialias: true } );
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
   renderer.shadowMap.enabled = true;
 
   controls = new OrbitControls( camera, renderer.domElement );
-  controls.target.set( 0, 20, 0 );
+  controls.target.set( 0, 0, -20 );
   controls.update();
 
+  stats = new Stats();
+  container.appendChild( stats.dom );
 
   container.appendChild( renderer.domElement );
 
@@ -99,72 +123,83 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame( animate );
 
-  var delta = clock.getDelta();
+  starGeo.vertices.forEach(p => {
+    p.velocity += p.acceleration
+    p.z += p.velocity;
 
-  if ( mixer ) {
-    if ( left === true ) {
-      player.position.x += 0.75;
-      player.rotation.y = 0.25 * Math.PI;
+    if (p.z > 0) {
+      p.z = -1000;
+      p.velocity = 0;
     }
-    if ( right === true ) {
-      player.position.x -= 0.75;
-      player.rotation.y = -0.25 * Math.PI;
-    }
-    if ( !left && !right ) {
-      player.rotation.y = 0;
+  });
+  starGeo.verticesNeedUpdate = true;
 
-      ground.material.map.offset.y -= 0.01;
-    } else {
-      ground.material.map.offset.y -= 0.0085;
-    }
-
-    count++;
-    if( count < 10) {
-      console.log(count, );
-    }
-
-    mixer.update( delta );
+  if ( left ) {
+    playerGroup.position.x -= controlSpeed;
+    // playerGroup.rotation.y = 0.25 * Math.PI;
+  }
+  if ( right ) {
+    playerGroup.position.x += controlSpeed;
+    // playerGroup.rotation.y = -0.25 * Math.PI;
+  }
+  if ( up ) {
+    playerGroup.position.y += controlSpeed;
+  }
+  if ( down ) {
+    playerGroup.position.y -= controlSpeed;
   }
 
+  stats.update();
   renderer.render( scene, camera );
 }
 
 function setPressedKey( event ) {
-  if ( event.keyCode === 188 ) { // left 37
+  console.log('???', event.keyCode );
+
+  if ( event.keyCode === 65 ) {
     left = true;
   }
-  if ( event.keyCode === 190 ) { // right 39
+  if ( event.keyCode === 68 ) {
     right = true;
   }
+  if ( event.keyCode === 87 ) {
+    up = true;
+  }
+  if ( event.keyCode === 83 ) {
+    down = true;
+  }
+  // if ( event.keyCode === )
 }
 
 function resetPressedKey( event ) {
-  if ( event.keyCode === 188 ) { // left 37
+  if ( event.keyCode === 65 ) {
     left = false;
   }
-  if ( event.keyCode === 190 ) { // right 39
+  if ( event.keyCode === 68 ) {
     right = false;
+  }
+  if ( event.keyCode === 87 ) {
+    up = false;
+  }
+  if ( event.keyCode === 83 ) {
+    down = false;
   }
 }
 
-// function handleKeyDown(keyEvent){
-// 	if(jumping)return;
-// 	var validMove=true;
-// 	if ( keyEvent.keyCode === 37) {//left
-// 		if(currentLane==middleLane){
-// 			currentLane=leftLane;
-// 		}else if(currentLane==rightLane){
-// 			currentLane=middleLane;
-// 		}else{
-// 			validMove=false;
-// 		}
-// 	} else if ( keyEvent.keyCode === 39) {//right
-// 		if(currentLane==middleLane){
-// 			currentLane=rightLane;
-// 		}else if(currentLane==leftLane){
-// 			currentLane=middleLane;
-// 		}else{
-// 			validMove=false;
-// 		}
-// 	}
-// }
+function checkCollision(object1, object2){
+  var originPoint = group.position.clone();
+  var collidableMeshList = [];
+  collidableMeshList.push(object2);
+  for (var vertexIndex = 0; vertexIndex < object1.geometry.vertices.length; vertexIndex++)
+  {
+    var localVertex = object1.geometry.vertices[vertexIndex].clone();
+    var globalVertex = localVertex.applyMatrix4( object1.matrix );
+    var directionVector = globalVertex.sub( object1.position );
+
+    var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+    var collisionResults = ray.intersectObjects( collidableMeshList );
+    if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
+      console.log('Hit');
+    }
+  }
+}
