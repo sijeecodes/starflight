@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { FBXLoader } from './libs/FBXLoader';
 import { OrbitControls } from './libs/Orbitcontrols';
+import { OBJLoader } from './libs/OBJLoader';
 import Stats from './libs/stats.module.js';
 
 var container, camera, scene, renderer, hemiLight, directLight;
-var starGeo, stars;
+var starGeo, stars, asteroids;
 let controls;
 
 var stats, clock = new THREE.Clock();
@@ -39,7 +40,7 @@ function init() {
   scene.add( directLight );
 
   starGeo = new THREE.Geometry();
-  for(let i=0;i<3000;i++) {
+  for( let i = 0 ; i < 3000 ; i++ ) {
     let star = new THREE.Vector3(
       Math.random() * 1000 - 500,
       Math.random() * 1000 - 500,
@@ -47,7 +48,7 @@ function init() {
     );
     star.velocity = 0;
     star.acceleration = 0.03;
-    starGeo.vertices.push(star);
+    starGeo.vertices.push( star );
   }
   let sprite = new THREE.TextureLoader().load( 'models/star.png' );
   let starMaterial = new THREE.PointsMaterial({
@@ -55,9 +56,27 @@ function init() {
     size: 2,
     map: sprite
   });
-  stars = new THREE.Points(starGeo,starMaterial);
-  scene.add(stars);
+  stars = new THREE.Points( starGeo, starMaterial );
+  scene.add( stars );
 
+  var loader2 = new OBJLoader()
+  loader2.load('models/asteroid1.obj', function (object) {
+    var texture = new THREE.TextureLoader().load('models/asteroidTexture.jpg');
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set( 2, 2 );
+
+    object.traverse(function ( child ) {
+        if ( child instanceof THREE.Mesh ) {
+            child.material = new THREE.MeshLambertMaterial();
+            child.material.map = texture;
+        }
+    });
+    object.scale.set( 3, 3, 3 );
+    object.position.set( 0, 0, -10 );
+    object.rotation.y = 0.5 * Math.PI;
+    scene.add( object );
+  });
 
   //
   // for(let i=0;i<3000;i++) {
@@ -123,11 +142,11 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame( animate );
 
-  starGeo.vertices.forEach(p => {
+  starGeo.vertices.forEach(function(p) {
     p.velocity += p.acceleration
     p.z += p.velocity;
 
-    if (p.z > 0) {
+    if ( p.z > 0 ) {
       p.z = -1000;
       p.velocity = 0;
     }
@@ -186,7 +205,7 @@ function resetPressedKey( event ) {
   }
 }
 
-function checkCollision(object1, object2){
+function checkCollision( object1, object2 ){
   var originPoint = group.position.clone();
   var collidableMeshList = [];
   collidableMeshList.push(object2);
