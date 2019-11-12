@@ -1,6 +1,6 @@
 var updateStars = function( starGeo ) {
   starGeo.vertices.forEach( function( star ) {
-    star.velocity += star.acceleration
+    star.velocity += 0.03;
     star.z += star.velocity;
 
     if ( star.z > 0 ) {

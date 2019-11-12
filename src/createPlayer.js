@@ -37,7 +37,7 @@ var createPlayer = function() {
   // wingCollisionCheckPlane2.visible = false;
   playerGroup.add( wingCollisionCheckPlane2 );
 
-  playerGroup.scale.set( 0.5, 0.5, 0.5 );
+  playerGroup.scale.set( 0.3, 0.3, 0.3 );
   playerGroup.position.set( 0, 0, -20 );
 
   return playerGroup;

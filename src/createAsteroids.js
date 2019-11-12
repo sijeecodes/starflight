@@ -7,7 +7,8 @@ var createAsteroids = function() {
 
   for( var i = 0; i < 300; i++ ) {
     var loader = new OBJLoader()
-    loader.load('models/asteroid1.obj',
+    var type = Math.floor( Math.random() * 10 % 3 );
+    loader.load('models/asteroid' + type + '.obj',
       function( asteroid ) {
         var texture = new THREE.TextureLoader().load('models/asteroidTexture.jpg');
         texture.wrapS = THREE.RepeatWrapping;
@@ -21,14 +22,20 @@ var createAsteroids = function() {
             }
         });
         asteroid.scale.set(
-          Math.random() * 10 + 10,
-          Math.random() * 10 + 10,
-          Math.random() * 10 + 10
+          Math.random() * 20 + 40,
+          Math.random() * 20 + 40,
+          Math.random() * 20 + 40
         );
         asteroid.position.set(
-          Math.random() * 500 - 250,
-          Math.random() * 500 - 250,
-          -Math.random() * 20000
+          Math.random() * 1000 - 500,
+          Math.random() * 1000 - 500,
+          -Math.random() * 40000
+        );
+        asteroid.velocity = Math.random() * 40;
+        asteroid.rotate = new THREE.Vector3(
+          Math.random() * 0.02,
+          Math.random() * 0.02,
+          Math.random() * 0.02
         );
         asteroids.add( asteroid );
       }
