@@ -1,19 +1,23 @@
 import * as THREE from 'three';
-import { FBXLoader } from './libs/FBXLoader';
 import { OrbitControls } from './libs/Orbitcontrols';
 import { OBJLoader } from './libs/OBJLoader';
 import Stats from './libs/stats.module.js';
+import createDirectLight from './createDirectLight';
+import { createStarGeo, createStarMaterial } from './createStars';
+import createPlayer from './createPlayer';
+import createAsteroids from './createAsteroids';
+import updateStars from './updateStars';
+import updateAsteroids from './updateAsteroids';
 
-var container, camera, scene, renderer, hemiLight, directLight;
-var starGeo, stars, asteroids;
+var container, camera, scene, renderer, hemiLight;
+var starGeo, stars, asteroids = [];
 let controls;
 
 var stats, clock = new THREE.Clock();
 var playerGroup;
-var right = false, left = false, up = false, down = false, controlSpeed = 0.3;
+var right = false, left = false, up = false, down = false, controlSpeed = 0.4;
 
 init();
-animate();
 
 function init() {
   container = document.createElement( 'div' );
@@ -21,96 +25,17 @@ function init() {
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color( 0x000000 );
-
-  camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
   // x(+left/-right) y(+high/-low) z(+front/-rear)
+  camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 20000 );
+  playerGroup = createPlayer();
+  starGeo = createStarGeo();
+  asteroids = createAsteroids();
 
-  hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444, 0.8 );
-  scene.add( hemiLight );
-
-  directLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
-  directLight.position.set( 100, 200, 100 );
-  directLight.castShadow = true;
-  directLight.shadow.mapSize.width = 5120;
-  directLight.shadow.mapSize.height = 5120;
-  directLight.shadow.camera.bottom = -200;
-  directLight.shadow.camera.left = -200;
-  directLight.shadow.camera.top = 80;
-  directLight.shadow.camera.right = 80;
-  scene.add( directLight );
-
-  starGeo = new THREE.Geometry();
-  for( let i = 0 ; i < 3000 ; i++ ) {
-    let star = new THREE.Vector3(
-      Math.random() * 1000 - 500,
-      Math.random() * 1000 - 500,
-      - Math.random() * 1000
-    );
-    star.velocity = 0;
-    star.acceleration = 0.03;
-    starGeo.vertices.push( star );
-  }
-  let sprite = new THREE.TextureLoader().load( 'models/star.png' );
-  let starMaterial = new THREE.PointsMaterial({
-    color: 0xaaaaaa,
-    size: 2,
-    map: sprite
-  });
-  stars = new THREE.Points( starGeo, starMaterial );
-  scene.add( stars );
-
-  var loader2 = new OBJLoader()
-  loader2.load('models/asteroid1.obj', function (object) {
-    var texture = new THREE.TextureLoader().load('models/asteroidTexture.jpg');
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set( 2, 2 );
-
-    object.traverse(function ( child ) {
-        if ( child instanceof THREE.Mesh ) {
-            child.material = new THREE.MeshLambertMaterial();
-            child.material.map = texture;
-        }
-    });
-    object.scale.set( 3, 3, 3 );
-    object.position.set( 0, 0, -10 );
-    object.rotation.y = 0.5 * Math.PI;
-    scene.add( object );
-  });
-
-  //
-  // for(let i=0;i<3000;i++) {
-  //   let star = new THREE.Vector3(
-  //     Math.random() * 1000 - 500,
-  //     Math.random() * 1000 - 500,
-  //     Math.random() * 1000 - 500
-  //   );
-  //   star.velocity = 0;
-  //   star.acceleration = 0.03;
-  //   starGeo.vertices.push(star);
-  // }
-  // let sprite = new THREE.TextureLoader().load( 'models/star.png' );
-  // let starMaterial = new THREE.PointsMaterial({
-  //   color: 0xaaaaaa,
-  //   size: 2,
-  //   map: sprite
-  // });
-  // stars = new THREE.Points(starGeo,starMaterial);
-  // scene.add(stars);
-
-
-  // Player space ship + collision check box
-  playerGroup = new THREE.Group();
-  var loader = new FBXLoader();
-  loader.load( 'models/X.fbx', function ( object ) {
-    object.castShadow = true;
-    playerGroup.add( object );
-  } );
-
-  playerGroup.scale.set( 0.8, 0.8, 0.8 );
-  // playerGroup.rotation.x = 0.5 * Math.PI;
-  playerGroup.position.set( 0, 0, -20 );
+  scene.add( new THREE.HemisphereLight( 0xffffff, 0x444444, 0.8 ) );
+  scene.add( createDirectLight() );
   scene.add( playerGroup );
+  scene.add( new THREE.Points( starGeo, createStarMaterial() ));
+  scene.add( asteroids );
 
   // Render
   renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -118,19 +43,20 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   renderer.shadowMap.enabled = true;
 
+  // for Dev
   controls = new OrbitControls( camera, renderer.domElement );
   controls.target.set( 0, 0, -20 );
   controls.update();
-
   stats = new Stats();
   container.appendChild( stats.dom );
 
-  container.appendChild( renderer.domElement );
 
+  container.appendChild( renderer.domElement );
   window.addEventListener( 'resize', onWindowResize, false );
   window.addEventListener( 'keydown', setPressedKey );
   window.addEventListener( 'keyup', resetPressedKey );
 
+  animate();
 }
 
 function onWindowResize() {
@@ -141,17 +67,8 @@ function onWindowResize() {
 
 function animate() {
   requestAnimationFrame( animate );
-
-  starGeo.vertices.forEach(function(p) {
-    p.velocity += p.acceleration
-    p.z += p.velocity;
-
-    if ( p.z > 0 ) {
-      p.z = -1000;
-      p.velocity = 0;
-    }
-  });
-  starGeo.verticesNeedUpdate = true;
+  updateStars( starGeo );
+  updateAsteroids( asteroids );
 
   if ( left ) {
     playerGroup.position.x -= controlSpeed;
