@@ -8,6 +8,7 @@ import createPlayer from './createPlayer';
 import createAsteroids from './createAsteroids';
 import updateStars from './updateStars';
 import updateAsteroids from './updateAsteroids';
+import checkCollision from './checkCollision';
 
 var container, camera, scene, renderer, hemiLight;
 var starGeo, stars, asteroids = [];
@@ -51,6 +52,7 @@ function init() {
   stats = new Stats();
   container.appendChild( stats.dom );
 
+  console.log(playerGroup);
 
   container.appendChild( renderer.domElement );
   window.addEventListener( 'resize', onWindowResize, false );
@@ -70,19 +72,20 @@ function animate() {
   requestAnimationFrame( animate );
   updateStars( starGeo );
   updateAsteroids( asteroids );
+  checkCollision( playerGroup, asteroids );
 
-  if ( left ) {
+  if( left ) {
     playerGroup.position.x -= controlSpeed;
     // playerGroup.rotation.y = 0.25 * Math.PI;
   }
-  if ( right ) {
+  if( right ) {
     playerGroup.position.x += controlSpeed;
     // playerGroup.rotation.y = -0.25 * Math.PI;
   }
-  if ( up ) {
+  if( up ) {
     playerGroup.position.y += controlSpeed;
   }
-  if ( down ) {
+  if( down ) {
     playerGroup.position.y -= controlSpeed;
   }
 
@@ -91,52 +94,32 @@ function animate() {
 }
 
 function setPressedKey( event ) {
-  console.log('???', event.keyCode );
-
-  if ( event.keyCode === 65 ) {
+  if( event.keyCode === 65 ) {
     left = true;
   }
-  if ( event.keyCode === 68 ) {
+  if( event.keyCode === 68 ) {
     right = true;
   }
-  if ( event.keyCode === 87 ) {
+  if( event.keyCode === 87 ) {
     up = true;
   }
-  if ( event.keyCode === 83 ) {
+  if( event.keyCode === 83 ) {
     down = true;
   }
   // if ( event.keyCode === )
 }
 
 function resetPressedKey( event ) {
-  if ( event.keyCode === 65 ) {
+  if( event.keyCode === 65 ) {
     left = false;
   }
-  if ( event.keyCode === 68 ) {
+  if( event.keyCode === 68 ) {
     right = false;
   }
-  if ( event.keyCode === 87 ) {
+  if( event.keyCode === 87 ) {
     up = false;
   }
-  if ( event.keyCode === 83 ) {
+  if( event.keyCode === 83 ) {
     down = false;
-  }
-}
-
-function checkCollision( object1, object2 ){
-  var originPoint = group.position.clone();
-  var collidableMeshList = [];
-  collidableMeshList.push(object2);
-  for (var vertexIndex = 0; vertexIndex < object1.geometry.vertices.length; vertexIndex++)
-  {
-    var localVertex = object1.geometry.vertices[vertexIndex].clone();
-    var globalVertex = localVertex.applyMatrix4( object1.matrix );
-    var directionVector = globalVertex.sub( object1.position );
-
-    var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-    var collisionResults = ray.intersectObjects( collidableMeshList );
-    if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
-      console.log('Hit');
-    }
   }
 }

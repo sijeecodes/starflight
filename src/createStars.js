@@ -14,15 +14,15 @@ var createStarGeo = function() {
   }
 
   return starGeo;
-}
+};
 
 var createStarMaterial = function() {
   var sprite = new THREE.TextureLoader().load( 'models/star.png' );
-  return new THREE.PointsMaterial({
+  return new THREE.PointsMaterial( {
     color: 0xaaaaaa,
     size: 2,
     map: sprite
-  });
-}
+  } );
+};
 
 export { createStarGeo, createStarMaterial };

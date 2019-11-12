@@ -7,7 +7,7 @@ var updateStars = function( starGeo ) {
       star.z = -1000;
       star.velocity = 0;
     }
-  });
+  } );
   starGeo.verticesNeedUpdate = true;
 };
 

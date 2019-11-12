@@ -17,10 +17,10 @@ var createAsteroids = function() {
 
         asteroid.traverse(function ( child ) {
             if ( child instanceof THREE.Mesh ) {
-                child.material = new THREE.MeshLambertMaterial();
+                child.material = new THREE.MeshLambertMaterial( { side: THREE.DoubleSide });
                 child.material.map = texture;
             }
-        });
+        } );
         asteroid.scale.set(
           Math.random() * 20 + 40,
           Math.random() * 20 + 40,
@@ -31,11 +31,15 @@ var createAsteroids = function() {
           Math.random() * 1000 - 500,
           -Math.random() * 40000
         );
-        asteroid.velocity = Math.random() * 40;
+        asteroid.velocity = Math.random() * 35;
         asteroid.rotate = new THREE.Vector3(
           Math.random() * 0.02,
           Math.random() * 0.02,
           Math.random() * 0.02
+        );
+        asteroid.xyMove = new THREE.Vector2(
+          ( Math.random() - 0.5 ) * 2,
+          ( Math.random() - 0.5 ) * 2
         );
         asteroids.add( asteroid );
       }
