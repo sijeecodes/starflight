@@ -13,8 +13,7 @@ var createPlayer = function() {
   var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
   var bodyCollisionCheckBox = new THREE.Mesh( geometry, material );
   bodyCollisionCheckBox.position.set( 0, 0, 0 );
-  bodyCollisionCheckBox.rotation.y = 0.5 * Math.PI;
-  console.log(bodyCollisionCheckBox.geometry);
+  bodyCollisionCheckBox.rotation.set( 0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI );
   bodyCollisionCheckBox.geometry.vertices[6] = new THREE.Vector3( -10, 1.4, -2 );
   bodyCollisionCheckBox.geometry.vertices[7] = new THREE.Vector3( -10, 1.4, 2 );
   bodyCollisionCheckBox.geometry.vertices[8] = new THREE.Vector3( -10, 0, -2 );
