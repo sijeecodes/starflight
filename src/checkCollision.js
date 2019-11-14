@@ -1,16 +1,17 @@
 import * as THREE from 'three';
+import updateAsteroids from './updateAsteroids';
 
 var checkCollision = function( playerGroup, asteroids ) {
   var collidableMeshList = [];
   var originPoint = playerGroup.position.clone();
 
   asteroids.children.forEach( function( asteroid ) {
-    if( asteroid.position.distanceTo(playerGroup.position) < 50 ) {
-      console.log(asteroid);
+    if( asteroid.position.distanceTo(playerGroup.position) < 150 ) {
       collidableMeshList.push(asteroid.children[0]);
     }
   } );
 
+  var initializedAsteroids = [];
   if( collidableMeshList.length > 0 ) {
     for( var i = 0; i < 3; i++ ) {
       var collisionVertices = playerGroup.children[i].geometry.vertices;
@@ -24,8 +25,13 @@ var checkCollision = function( playerGroup, asteroids ) {
         var collisionResults = ray.intersectObjects( collidableMeshList );
         if( collisionResults.length > 0 ) {
           for( var j = 0; j < collisionResults.length; j++) {
-            if( collisionResults[j].distance < directionVector.length() ) {
+
+            if( collisionResults[j].distance < directionVector.length()
+              && initializedAsteroids.indexOf( collisionResults[j].object.uuid ) === -1 ) {
               console.log('Hit', collisionResults[j].distance, collisionResults);
+              updateAsteroids( collisionResults[j].object.parent, 'Hit' );
+              initializedAsteroids.push( collisionResults[j].object.uuid );
+              return originPoint;
             }
           }
         }

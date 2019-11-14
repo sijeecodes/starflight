@@ -22,16 +22,16 @@ var createAsteroids = function() {
             }
         } );
         asteroid.scale.set(
-          Math.random() * 20 + 40,
-          Math.random() * 20 + 40,
-          Math.random() * 20 + 40
+          Math.random() * 60 + 40,
+          Math.random() * 60 + 40,
+          Math.random() * 60 + 40
         );
         asteroid.position.set(
           Math.random() * 1000 - 500,
           Math.random() * 1000 - 500,
           -Math.random() * 40000
         );
-        asteroid.velocity = Math.random() * 35;
+        asteroid.velocity = Math.random() * 30;
         asteroid.rotate = new THREE.Vector3(
           Math.random() * 0.02,
           Math.random() * 0.02,

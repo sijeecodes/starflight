@@ -12,11 +12,16 @@ import checkCollision from './checkCollision';
 
 var container, camera, scene, renderer, hemiLight;
 var starGeo, stars, asteroids = [];
-let controls;
+var controls;
 
 var stats, clock = new THREE.Clock();
 var playerGroup;
-var right = false, left = false, up = false, down = false, controlSpeed = 0.2;
+var right = false, left = false, up = false, down = false, controlSpeed = 0.3;
+
+var particleGeometry;
+var particleCount=100;
+var explosionPower =1.06;
+var particles;
 
 init();
 
@@ -32,6 +37,7 @@ function init() {
   playerGroup = createPlayer();
   starGeo = createStarGeo();
   asteroids = createAsteroids();
+  addExplosion();
 
   scene.add( new THREE.HemisphereLight( 0xffffff, 0x444444, 0.8 ) );
   scene.add( createDirectLight() );
@@ -52,8 +58,6 @@ function init() {
   stats = new Stats();
   container.appendChild( stats.dom );
 
-  console.log(playerGroup);
-
   container.appendChild( renderer.domElement );
   window.addEventListener( 'resize', onWindowResize, false );
   window.addEventListener( 'keydown', setPressedKey );
@@ -69,10 +73,13 @@ function onWindowResize() {
 }
 
 function animate() {
-  requestAnimationFrame( animate );
   updateStars( starGeo );
   updateAsteroids( asteroids );
-  checkCollision( playerGroup, asteroids );
+  var explodePosition = checkCollision( playerGroup, asteroids );
+  if( explodePosition ) {
+    explode( explodePosition );
+  }
+  doExplosionLogic();
 
   if( left ) {
     playerGroup.position.x -= controlSpeed;
@@ -91,6 +98,8 @@ function animate() {
 
   stats.update();
   renderer.render( scene, camera );
+
+  requestAnimationFrame( animate );
 }
 
 function setPressedKey( event ) {
@@ -122,4 +131,46 @@ function resetPressedKey( event ) {
   if( event.keyCode === 83 ) {
     down = false;
   }
+}
+function addExplosion(){
+	particleGeometry = new THREE.Geometry();
+	for (var i = 0; i < particleCount; i ++ ) {
+		var vertex = new THREE.Vector3();
+		particleGeometry.vertices.push( vertex );
+	}
+	var pMaterial = new THREE.ParticleBasicMaterial({
+	  color: 0xfffafa,
+	  size: 0.5
+	});
+	particles = new THREE.Points( particleGeometry, pMaterial );
+	scene.add( particles );
+	particles.visible=false;
+}
+
+function doExplosionLogic(){
+	if(!particles.visible)return;
+	for (var i = 0; i < particleCount; i ++ ) {
+		particleGeometry.vertices[i].multiplyScalar(explosionPower);
+	}
+	if(explosionPower > 1.005){
+		explosionPower -= 0.001;
+	}else{
+		particles.visible=false;
+	}
+	particleGeometry.verticesNeedUpdate = true;
+}
+function explode( explodePosition ){
+  particles.position.x = explodePosition.x;
+	particles.position.y = explodePosition.y;
+	particles.position.z = explodePosition.z;
+
+	for (var i = 0; i < particleCount; i ++ ) {
+		var vertex = new THREE.Vector3();
+		vertex.x = -0.2+Math.random() * 0.4;
+		vertex.y = -0.2+Math.random() * 0.4 ;
+		vertex.z = -0.2+Math.random() * 0.4;
+		particleGeometry.vertices[i]=vertex;
+	}
+	explosionPower=1.07;
+	particles.visible=true;
 }
