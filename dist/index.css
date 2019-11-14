@@ -10,25 +10,6 @@ canvas {
   height: 100%;
 }
 
-#gameoverInstructions{
-  position:absolute;
-  font-weight:bold;
-  font-size:120px;
-  text-align:center;
-  color:#ffc5a2;
-  opacity:0;
-  left:50%;
-  top:50%;
-  width:100%;
-  transform : translate(-50%,-100%);
-  transition: all 5s ease-in-out;
-/*
-  &.show{
-    opacity:1;
-    transition: all 500ms ease-in-out;
-  }; */
-}
-
 #title {
   position: absolute;
   left: 50%;
@@ -113,8 +94,4 @@ canvas {
   transform: translate(-50%,-100%);
   transition: all 1s ease-in-out;
   user-select: none;
-}
-
-.gameover-label {
-
 }

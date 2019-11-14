@@ -2,16 +2,16 @@ var updateAsteroids = function( asteroids, hit ) {
   var updateAsteroid = function( asteroid, initiate ) {
     if( asteroid.position.z > 300 || initiate ) {
       asteroid.scale.set(
-        Math.random() * 60 + 40,
-        Math.random() * 60 + 40,
-        Math.random() * 60 + 40
+        Math.random() * 40 + 40,
+        Math.random() * 40 + 40,
+        Math.random() * 40 + 40
       );
       asteroid.position.set(
         Math.random() * 1000 - 500,
         Math.random() * 1000 - 500,
         -4000
       );
-      asteroid.velocity = Math.random() * 30;
+      asteroid.velocity = Math.random() * 20 + 1;
       if( initiate ) {
         console.log('init');
       }
@@ -22,7 +22,7 @@ var updateAsteroids = function( asteroids, hit ) {
       asteroid.position.x += asteroid.xyMove.x;
       asteroid.position.y += asteroid.xyMove.y;
       asteroid.position.z += asteroid.velocity;
-      asteroid.velocity += 0.005;
+      asteroid.velocity += 0.006;
     }
   }
 

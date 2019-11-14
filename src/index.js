@@ -61,8 +61,8 @@ function init() {
   controls = new OrbitControls( camera, renderer.domElement );
   controls.target.set( 0, 0, -20 );
   controls.update();
-  stats = new Stats();
-  container.appendChild( stats.dom );
+  // stats = new Stats();
+  // container.appendChild( stats.dom );
 
   container.appendChild( renderer.domElement );
   window.addEventListener( 'resize', onWindowResize, false );
@@ -148,7 +148,7 @@ function animate() {
     }
   }
 
-  stats.update();
+  // stats.update();
   renderer.render( scene, camera );
 
   requestAnimationFrame( animate );
@@ -189,45 +189,50 @@ function resetPressedKey( event ) {
     spacebar = false;
   }
 }
-function addExplosion(){
+function addExplosion() {
 	particleGeometry = new THREE.Geometry();
 	for (var i = 0; i < particleCount; i ++ ) {
 		var vertex = new THREE.Vector3();
 		particleGeometry.vertices.push( vertex );
 	}
-	var pMaterial = new THREE.ParticleBasicMaterial({
-	  color: 0xfffafa,
-	  size: 0.5
-	});
+  var sprite = new THREE.TextureLoader().load( 'models/explosion.png' );
+  var pMaterial = new THREE.ParticleBasicMaterial( {
+    color: 0xffffff,
+    size: 0.5,
+    map: sprite,
+    transparent: true
+  } );
 	particles = new THREE.Points( particleGeometry, pMaterial );
 	scene.add( particles );
-	particles.visible=false;
+	particles.visible = false;
 }
 
-function doExplosionLogic(){
-	if(!particles.visible)return;
-	for (var i = 0; i < particleCount; i ++ ) {
+function doExplosionLogic() {
+	if( !particles.visible ) {
+    return;
+  }
+	for( var i = 0; i < particleCount; i ++ ) {
 		particleGeometry.vertices[i].multiplyScalar(explosionPower);
 	}
-	if(explosionPower > 1.005){
+	if( explosionPower > 1.03 ) {
 		explosionPower -= 0.001;
-	}else{
-		particles.visible=false;
+	} else {
+		particles.visible = false;
 	}
 	particleGeometry.verticesNeedUpdate = true;
 }
-function explode( explodePosition ){
+function explode( explodePosition ) {
   particles.position.x = explodePosition.x;
 	particles.position.y = explodePosition.y;
 	particles.position.z = explodePosition.z;
 
-	for (var i = 0; i < particleCount; i ++ ) {
+	for ( var i = 0; i < particleCount; i ++ ) {
 		var vertex = new THREE.Vector3();
-		vertex.x = -0.2+Math.random() * 0.4;
-		vertex.y = -0.2+Math.random() * 0.4 ;
-		vertex.z = -0.2+Math.random() * 0.4;
-		particleGeometry.vertices[i]=vertex;
+		vertex.x = Math.random() * 0.4 - 0.2;
+		vertex.y = Math.random() * 0.4 - 0.2;
+		vertex.z = Math.random() * 0.4 - 0.2;
+		particleGeometry.vertices[i] = vertex;
 	}
-	explosionPower=1.07;
-	particles.visible=true;
+	explosionPower = 1.1;
+	particles.visible = true;
 }
