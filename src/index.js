@@ -23,7 +23,9 @@ var docTitle, docShield, docScore, docScoreValue, docGameover;
 
 var stats, clock = new THREE.Clock();
 var playerGroup;
-var right = false, left = false, up = false, down = false, spacebar = false, controlSpeed = 0.3;
+var right = false, left = false, up = false, down = false, spacebar = false;
+
+var maxSpeed = 0.8, xSpeed = 0, ySpeed = 0;
 
 var particleGeometry;
 var particleCount = 100;
@@ -57,13 +59,6 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   renderer.shadowMap.enabled = true;
 
-  // for Dev
-  controls = new OrbitControls( camera, renderer.domElement );
-  controls.target.set( 0, 0, -20 );
-  controls.update();
-  // stats = new Stats();
-  // container.appendChild( stats.dom );
-
   container.appendChild( renderer.domElement );
   window.addEventListener( 'resize', onWindowResize, false );
   window.addEventListener( 'keydown', setPressedKey );
@@ -91,7 +86,6 @@ function animate() {
     doExplosionLogic();
 
     if( spacebar ) {
-      gameState = 'playing';
       docTitle.style.opacity = 0;
       docGameover.style.opacity = 0;
       docShield.style.opacity = 1;
@@ -99,7 +93,14 @@ function animate() {
       docScoreValue.innerHTML = 0;
       gameScore = 0;
       shieldPoint = 30;
+      var shieldHTML = '';
+      for( var i = 0; i < shieldPoint; i++ ) {
+        shieldHTML += '|';
+      }
+      docShield.innerHTML = shieldHTML;
+      playerGroup.position.set( 0, 0, -30 );
       scene.add( playerGroup );
+      gameState = 'playing';
     }
   }
 
@@ -117,40 +118,79 @@ function animate() {
       } else {
         scene.remove( playerGroup );
         docGameover.style.opacity = 1;
-        playerGroup.position.set( 0, 0, -20 );
         gameState = 'gameover';
       }
-
 
     }
     doExplosionLogic();
 
-    if( left ) {
-      playerGroup.position.x -= controlSpeed;
-      // playerGroup.rotation.y = 0.25 * Math.PI;
-    }
-    if( right ) {
-      playerGroup.position.x += controlSpeed;
-      // playerGroup.rotation.y = -0.25 * Math.PI;
-    }
-    if( up ) {
-      playerGroup.position.y += controlSpeed;
-    }
-    if( down ) {
-      playerGroup.position.y -= controlSpeed;
+    if( left && playerGroup.position.x > -80 ) {
+      // var maxSpeed = 0.7, xSpeed = 0, ySpeed = 0;
+      if( xSpeed > -maxSpeed ) {
+        xSpeed -= 0.04;
+      }
+      playerGroup.position.x += xSpeed;
+    } else if( xSpeed < 0 && !right ) {
+      xSpeed += 0.02;
+      if ( xSpeed > 0 ) {
+        xSpeed = 0;
+      }
+      playerGroup.position.x += xSpeed;
     }
 
+    if( right && playerGroup.position.x < 80 ) {
+      if( xSpeed < maxSpeed ) {
+        xSpeed += 0.04;
+      }
+      playerGroup.position.x += xSpeed;
+    } else if( xSpeed > 0 && !left ) {
+      xSpeed -= 0.02;
+      if ( xSpeed < 0 ) {
+        xSpeed = 0;
+      }
+      playerGroup.position.x += xSpeed;
+    }
+
+    if( up && playerGroup.position.y < 30 ) {
+      if( ySpeed < maxSpeed ) {
+        ySpeed += 0.04;
+      }
+      playerGroup.position.y += ySpeed;
+    } else if( ySpeed > 0 && !up ) {
+      ySpeed -= 0.02;
+      if ( ySpeed < 0 ) {
+        ySpeed = 0;
+      }
+      playerGroup.position.y += ySpeed;
+    }
+
+    if( down && playerGroup.position.y > -30 ) {
+      if( ySpeed > -maxSpeed ) {
+        ySpeed -= 0.04;
+      }
+      playerGroup.position.y += ySpeed;
+    } else if( ySpeed < 0 && !down ) {
+      ySpeed += 0.02;
+      if ( ySpeed > 0 ) {
+        ySpeed = 0;
+      }
+      playerGroup.position.y += ySpeed;
+    }
+
+    camera.rotation.y = - playerGroup.position.x / 700 * Math.PI;
+    camera.position.x = playerGroup.position.x / 1.5;
+    camera.rotation.x = playerGroup.position.y / 700 * Math.PI;
+    camera.position.y = playerGroup.position.y / 1.5;
+
     scoreTimer++;
-    if( scoreTimer >= 30 ) {
+    if( scoreTimer >= 20 ) {
       scoreTimer = 0;
       gameScore++;
       docScoreValue.innerHTML = gameScore;
     }
   }
 
-  // stats.update();
   renderer.render( scene, camera );
-
   requestAnimationFrame( animate );
 }
 
