@@ -11,16 +11,23 @@ import updateAsteroids from './updateAsteroids';
 import checkCollision from './checkCollision';
 
 var container, camera, scene, renderer, hemiLight;
+var gameState = 'ready';
+// ready, - press something to start
+// playing, - set display playerGroup, check collisions, add score, gameover when shield < 0
+// gameover - remove playerGroup from scene, display game over, press something to play again
+var gameScore = 0, shield = 100;
 var starGeo, stars, asteroids = [];
 var controls;
+var gameScore = 0, scoreTimer = 0, shieldPoint = 30;
+var docTitle, docShield, docScore, docScoreValue, docGameover;
 
 var stats, clock = new THREE.Clock();
 var playerGroup;
-var right = false, left = false, up = false, down = false, controlSpeed = 0.3;
+var right = false, left = false, up = false, down = false, spacebar = false, controlSpeed = 0.3;
 
 var particleGeometry;
-var particleCount=100;
-var explosionPower =1.06;
+var particleCount = 100;
+var explosionPower = 1.06;
 var particles;
 
 init();
@@ -41,7 +48,6 @@ function init() {
 
   scene.add( new THREE.HemisphereLight( 0xffffff, 0x444444, 0.8 ) );
   scene.add( createDirectLight() );
-  scene.add( playerGroup );
   scene.add( new THREE.Points( starGeo, createStarMaterial() ));
   scene.add( asteroids );
 
@@ -63,6 +69,11 @@ function init() {
   window.addEventListener( 'keydown', setPressedKey );
   window.addEventListener( 'keyup', resetPressedKey );
 
+  docTitle = document.getElementById('title');
+  docShield = document.getElementById('shield');
+  docScore = document.getElementById('score');
+  docScoreValue = document.getElementById('score-value');
+  docGameover = document.getElementById('gameover');
   animate();
 }
 
@@ -75,25 +86,66 @@ function onWindowResize() {
 function animate() {
   updateStars( starGeo );
   updateAsteroids( asteroids );
-  var explodePosition = checkCollision( playerGroup, asteroids );
-  if( explodePosition ) {
-    explode( explodePosition );
-  }
-  doExplosionLogic();
 
-  if( left ) {
-    playerGroup.position.x -= controlSpeed;
-    // playerGroup.rotation.y = 0.25 * Math.PI;
+  if( gameState === 'gameover' || gameState === 'ready') {
+    doExplosionLogic();
+
+    if( spacebar ) {
+      gameState = 'playing';
+      docTitle.style.opacity = 0;
+      docGameover.style.opacity = 0;
+      docShield.style.opacity = 1;
+      docScore.style.opacity = 1;
+      docScoreValue.innerHTML = 0;
+      gameScore = 0;
+      shieldPoint = 30;
+      scene.add( playerGroup );
+    }
   }
-  if( right ) {
-    playerGroup.position.x += controlSpeed;
-    // playerGroup.rotation.y = -0.25 * Math.PI;
-  }
-  if( up ) {
-    playerGroup.position.y += controlSpeed;
-  }
-  if( down ) {
-    playerGroup.position.y -= controlSpeed;
+
+  if( gameState === 'playing' ) {
+    var explodePosition = checkCollision( playerGroup, asteroids );
+    if( explodePosition ) {
+      explode( explodePosition );
+      shieldPoint -= 10;
+      if( shieldPoint >= 0 ) {
+        var shieldHTML = '';
+        for( var i = 0; i < shieldPoint; i++ ) {
+          shieldHTML += '|';
+        }
+        docShield.innerHTML = shieldHTML;
+      } else {
+        scene.remove( playerGroup );
+        docGameover.style.opacity = 1;
+        playerGroup.position.set( 0, 0, -20 );
+        gameState = 'gameover';
+      }
+
+
+    }
+    doExplosionLogic();
+
+    if( left ) {
+      playerGroup.position.x -= controlSpeed;
+      // playerGroup.rotation.y = 0.25 * Math.PI;
+    }
+    if( right ) {
+      playerGroup.position.x += controlSpeed;
+      // playerGroup.rotation.y = -0.25 * Math.PI;
+    }
+    if( up ) {
+      playerGroup.position.y += controlSpeed;
+    }
+    if( down ) {
+      playerGroup.position.y -= controlSpeed;
+    }
+
+    scoreTimer++;
+    if( scoreTimer >= 30 ) {
+      scoreTimer = 0;
+      gameScore++;
+      docScoreValue.innerHTML = gameScore;
+    }
   }
 
   stats.update();
@@ -115,7 +167,9 @@ function setPressedKey( event ) {
   if( event.keyCode === 83 ) {
     down = true;
   }
-  // if ( event.keyCode === )
+  if( event.keyCode === 32 ) {
+    spacebar = true;
+  }
 }
 
 function resetPressedKey( event ) {
@@ -130,6 +184,9 @@ function resetPressedKey( event ) {
   }
   if( event.keyCode === 83 ) {
     down = false;
+  }
+  if( event.keyCode === 32 ) {
+    spacebar = false;
   }
 }
 function addExplosion(){

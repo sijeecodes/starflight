@@ -1,0 +1,120 @@
+body {
+  margin: 0;
+  overflow: hidden;
+}
+body:hover {
+  cursor: default;
+}
+canvas {
+  width: 100%;
+  height: 100%;
+}
+
+#gameoverInstructions{
+  position:absolute;
+  font-weight:bold;
+  font-size:120px;
+  text-align:center;
+  color:#ffc5a2;
+  opacity:0;
+  left:50%;
+  top:50%;
+  width:100%;
+  transform : translate(-50%,-100%);
+  transition: all 5s ease-in-out;
+/*
+  &.show{
+    opacity:1;
+    transition: all 500ms ease-in-out;
+  }; */
+}
+
+#title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  text-align: center;
+  transform : translate(-50%,-100%);
+  user-select: none;
+  opacity: 1;
+  transition: all 1s ease-in-out;
+}
+
+.title-label {
+  display: block;
+  font-size: 100px;
+  color: hsl(0, 0%, 90%);
+}
+
+.title-sub {
+  display: block;
+  font-size: 25px;
+  color: hsl(0, 0%, 80%);
+}
+
+.instructions {
+  position: absolute;
+  text-align: center;
+  font-size: 25px;
+  color: hsl(55, 100%, 50%);
+  left: 50%;
+  top: 120%;
+  width: 100%;
+  transform : translate(-50%, 0%);
+  transition-delay: 3s;
+}
+
+#score {
+  position: absolute;
+  left: 20px;
+  top: 50px;
+  user-select: none;
+  text-align: left;
+  opacity: 0;
+  user-select: none;
+}
+
+.score-label {
+  display: inline-block;
+  color: hsl(0, 0%, 90%);
+  font-size: 20px;
+}
+
+#score-value {
+  position: absolute;
+  display: inline-block;
+  color: hsl(0, 0%, 90%);
+  font-size: 20px;
+  text-align: left;
+  margin-left: 5px;
+  user-select: none;
+}
+
+#shield {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  color: hsl(127, 100%, 44%);
+  font-size: 30px;
+  text-align: left;
+  opacity: 0;
+  user-select: none;
+}
+
+#gameover {
+  position: absolute;
+  text-align: center;
+  font-size: 100px;
+  color: hsl(0, 0%, 90%);
+  opacity: 0;
+  left: 50%;
+  top: 50.5%;
+  width: 100%;
+  transform: translate(-50%,-100%);
+  transition: all 1s ease-in-out;
+  user-select: none;
+}
+
+.gameover-label {
+
+}
