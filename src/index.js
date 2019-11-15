@@ -19,13 +19,15 @@ var clock = new THREE.Clock();
 var playerGroup;
 var right = false, left = false, up = false, down = false, spacebar = false;
 
-var maxSpeed = 0.8, xSpeed = 0, ySpeed = 0;
+var xMaxSpeed = 0.9, yMaxSpeed = 0.7, xSpeed = 0, ySpeed = 0;
 var xSpeedDecrease = 0.03, xSpeedIncrease = 0.05, ySpeedDecrease = 0.02, ySpeedIncrease = 0.04;
 
 var particleGeometry;
 var particleCount = 100;
 var explosionPower = 1.06;
 var particles;
+var bgm, music = false, audioVolume = 0;
+var explosionSound;
 
 init();
 
@@ -57,12 +59,31 @@ function init() {
   window.addEventListener( 'keydown', setPressedKey );
   window.addEventListener( 'keyup', resetPressedKey );
 
+  // create an AudioListener and add it to the camera
+  var listener = new THREE.AudioListener();
+  camera.add( listener );
+
+  bgm = new THREE.Audio( listener );
+  var audioLoader = new THREE.AudioLoader();
+  audioLoader.load( 'bensound-evolution.mp3', function( buffer ) {
+  	bgm.setBuffer( buffer );
+  	bgm.setLoop( true );
+  	bgm.setVolume( audioVolume );
+  } );
+  explosionSound = new THREE.Audio( listener );
+  audioLoader.load( 'explosion.wav', function( buffer ) {
+    explosionSound.setBuffer( buffer );
+    explosionSound.setLoop( false );
+    explosionSound.setVolume( 0.6 );
+  } );
+
   docTitle = document.getElementById('title');
   docShield = document.getElementById('shield');
   docScore = document.getElementById('score');
   docScoreValue = document.getElementById('score-value');
   docGameover = document.getElementById('gameover');
-  animate();
+
+  window.onload = animate();
 }
 
 function onWindowResize() {
@@ -74,6 +95,17 @@ function onWindowResize() {
 function animate() {
   updateStars( starGeo );
   updateAsteroids( asteroids );
+
+  if( !music ) {
+    if( audioVolume > 0 ) {
+      audioVolume -= 0.001;
+      bgm.setVolume( audioVolume );
+      console.log('current volume', audioVolume );
+    }
+    if( audioVolume <= 0 && bgm.isPlaying ) {
+      bgm.stop();
+    }
+  }
 
   if( gameState === 'gameover' || gameState === 'ready') {
     doExplosionLogic();
@@ -92,15 +124,34 @@ function animate() {
       }
       docShield.innerHTML = shieldHTML;
       playerGroup.position.set( 0, 0, -30 );
+      if( !music ) {
+        music = true;
+        audioVolume = 0.5;
+        bgm.setVolume( audioVolume );
+        bgm.play();
+        console.log('music on');
+      }
       scene.add( playerGroup );
       gameState = 'playing';
     }
   }
 
   if( gameState === 'playing' ) {
+    if( !music ) {
+      music = true;
+      audioVolume = 0.5;
+      bgm.setVolume( audioVolume );
+      bgm.play();
+      console.log('music on');
+    }
+
     var explodePosition = checkCollision( playerGroup, asteroids );
     if( explodePosition ) {
       explode( explodePosition );
+      if( explosionSound.isPlaying ){
+        explosionSound.stop();
+      }
+      explosionSound.play();
       shieldPoint -= 10;
       if( shieldPoint >= 0 ) {
         var shieldHTML = '';
@@ -112,6 +163,9 @@ function animate() {
         scene.remove( playerGroup );
         docGameover.style.opacity = 1;
         gameState = 'gameover';
+        if( music ) {
+          music = false;
+        }
       }
 
     }
@@ -131,7 +185,7 @@ function animate() {
       }
     } else {
       if( left && playerGroup.position.x > -80 ) {
-        if( xSpeed > -maxSpeed ) {
+        if( xSpeed > -xMaxSpeed ) {
           xSpeed -= xSpeedIncrease;
         }
       } else if( xSpeed < 0 ) {
@@ -141,7 +195,7 @@ function animate() {
         }
       }
       if( right && playerGroup.position.x < 80 ) {
-        if( xSpeed < maxSpeed ) {
+        if( xSpeed < xMaxSpeed ) {
           xSpeed += xSpeedIncrease;
         }
       } else if( xSpeed > 0 ) {
@@ -166,7 +220,7 @@ function animate() {
       }
     } else {
       if( up && playerGroup.position.y < 30 ) {
-        if( ySpeed < maxSpeed ) {
+        if( ySpeed < yMaxSpeed ) {
           ySpeed += ySpeedIncrease;
         }
       } else if( ySpeed > 0 ) {
@@ -176,7 +230,7 @@ function animate() {
         }
       }
       if( down && playerGroup.position.y > -30 ) {
-        if( ySpeed > -maxSpeed ) {
+        if( ySpeed > -yMaxSpeed ) {
           ySpeed -= ySpeedIncrease;
         }
       } else if( ySpeed < 0 ) {
