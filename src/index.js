@@ -1,7 +1,5 @@
 import * as THREE from 'three';
-import { OrbitControls } from './libs/Orbitcontrols';
 import { OBJLoader } from './libs/OBJLoader';
-import Stats from './libs/stats.module.js';
 import createDirectLight from './createDirectLight';
 import { createStarGeo, createStarMaterial } from './createStars';
 import createPlayer from './createPlayer';
@@ -12,16 +10,12 @@ import checkCollision from './checkCollision';
 
 var container, camera, scene, renderer, hemiLight;
 var gameState = 'ready';
-// ready, - press something to start
-// playing, - set display playerGroup, check collisions, add score, gameover when shield < 0
-// gameover - remove playerGroup from scene, display game over, press something to play again
 var gameScore = 0, shield = 100;
 var starGeo, stars, asteroids = [];
-var controls;
 var gameScore = 0, scoreTimer = 0, shieldPoint = 30;
 var docTitle, docShield, docScore, docScoreValue, docGameover;
 
-var stats, clock = new THREE.Clock();
+var clock = new THREE.Clock();
 var playerGroup;
 var right = false, left = false, up = false, down = false, spacebar = false;
 
@@ -42,7 +36,6 @@ function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color( 0x000000 );
   scene.fog = new THREE.FogExp2( 0x000000, 0.0004 );
-  // x(+left/-right) y(+high/-low) z(+front/-rear)
   camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000 );
   playerGroup = createPlayer();
   starGeo = createStarGeo();
@@ -54,7 +47,6 @@ function init() {
   scene.add( new THREE.Points( starGeo, createStarMaterial() ));
   scene.add( asteroids );
 
-  // Render
   renderer = new THREE.WebGLRenderer( { antialias: true } );
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
@@ -128,13 +120,11 @@ function animate() {
     if( left && right ) {
       if( xSpeed < 0 ) {
         xSpeed += xSpeedDecrease;
-        // xSpeed = xSpeed / 2 + xSpeedDecrease;
         if ( xSpeed > 0 ) {
           xSpeed = 0;
         }
       } else if( xSpeed > 0 ) {
         xSpeed -= xSpeedDecrease;
-        // xSpeed = xSpeed / 2 - xSpeedDecrease;
         if ( xSpeed < 0 ) {
           xSpeed = 0;
         }
@@ -146,7 +136,6 @@ function animate() {
         }
       } else if( xSpeed < 0 ) {
         xSpeed += xSpeedDecrease;
-        // xSpeed = xSpeed / 2 + xSpeedDecrease;
         if ( xSpeed > 0 ) {
           xSpeed = 0;
         }
@@ -157,7 +146,6 @@ function animate() {
         }
       } else if( xSpeed > 0 ) {
         xSpeed -= xSpeedDecrease;
-        // xSpeed = xSpeed / 2 - xSpeedDecrease;
         if ( xSpeed < 0 ) {
           xSpeed = 0;
         }
@@ -201,7 +189,6 @@ function animate() {
 
     playerGroup.position.x += xSpeed;
     playerGroup.position.y += ySpeed;
-
     playerGroup.rotation.y = -xSpeed / 10 * Math.PI;
     playerGroup.rotation.x = ySpeed / 10 * Math.PI;
     playerGroup.rotation.z = -xSpeed / 5 * Math.PI;
@@ -223,7 +210,6 @@ function animate() {
 }
 
 function setPressedKey( event ) {
-  console.log( 'KEY', event.keyCode );
   if( event.keyCode === 65 ) {
     left = true;
   }

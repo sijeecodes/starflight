@@ -28,7 +28,6 @@ var checkCollision = function( playerGroup, asteroids ) {
 
             if( collisionResults[j].distance < directionVector.length()
               && initializedAsteroids.indexOf( collisionResults[j].object.uuid ) === -1 ) {
-              console.log('Hit', collisionResults[j].distance, collisionResults);
               updateAsteroids( collisionResults[j].object.parent, 'Hit' );
               initializedAsteroids.push( collisionResults[j].object.uuid );
               return originPoint;
