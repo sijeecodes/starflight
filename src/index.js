@@ -26,6 +26,7 @@ var playerGroup;
 var right = false, left = false, up = false, down = false, spacebar = false;
 
 var maxSpeed = 0.8, xSpeed = 0, ySpeed = 0;
+var xSpeedDecrease = 0.03, xSpeedIncrease = 0.05, ySpeedDecrease = 0.02, ySpeedIncrease = 0.04;
 
 var particleGeometry;
 var particleCount = 100;
@@ -124,60 +125,87 @@ function animate() {
     }
     doExplosionLogic();
 
-    if( left && playerGroup.position.x > -80 ) {
-      // var maxSpeed = 0.7, xSpeed = 0, ySpeed = 0;
-      if( xSpeed > -maxSpeed ) {
-        xSpeed -= 0.04;
+    if( left && right ) {
+      if( xSpeed < 0 ) {
+        xSpeed += xSpeedDecrease;
+        // xSpeed = xSpeed / 2 + xSpeedDecrease;
+        if ( xSpeed > 0 ) {
+          xSpeed = 0;
+        }
+      } else if( xSpeed > 0 ) {
+        xSpeed -= xSpeedDecrease;
+        // xSpeed = xSpeed / 2 - xSpeedDecrease;
+        if ( xSpeed < 0 ) {
+          xSpeed = 0;
+        }
       }
-      playerGroup.position.x += xSpeed;
-    } else if( xSpeed < 0 && !right ) {
-      xSpeed += 0.02;
-      if ( xSpeed > 0 ) {
-        xSpeed = 0;
+    } else {
+      if( left && playerGroup.position.x > -80 ) {
+        if( xSpeed > -maxSpeed ) {
+          xSpeed -= xSpeedIncrease;
+        }
+      } else if( xSpeed < 0 ) {
+        xSpeed += xSpeedDecrease;
+        // xSpeed = xSpeed / 2 + xSpeedDecrease;
+        if ( xSpeed > 0 ) {
+          xSpeed = 0;
+        }
       }
-      playerGroup.position.x += xSpeed;
+      if( right && playerGroup.position.x < 80 ) {
+        if( xSpeed < maxSpeed ) {
+          xSpeed += xSpeedIncrease;
+        }
+      } else if( xSpeed > 0 ) {
+        xSpeed -= xSpeedDecrease;
+        // xSpeed = xSpeed / 2 - xSpeedDecrease;
+        if ( xSpeed < 0 ) {
+          xSpeed = 0;
+        }
+      }
     }
 
-    if( right && playerGroup.position.x < 80 ) {
-      if( xSpeed < maxSpeed ) {
-        xSpeed += 0.04;
+    if( up && down ) {
+      if( ySpeed > 0 ) {
+        ySpeed -= ySpeedDecrease;
+        if ( ySpeed < 0 ) {
+          ySpeed = 0;
+        }
+      } else if( ySpeed < 0 ) {
+        ySpeed += ySpeedDecrease;
+        if ( ySpeed > 0 ) {
+          ySpeed = 0;
+        }
       }
-      playerGroup.position.x += xSpeed;
-    } else if( xSpeed > 0 && !left ) {
-      xSpeed -= 0.02;
-      if ( xSpeed < 0 ) {
-        xSpeed = 0;
+    } else {
+      if( up && playerGroup.position.y < 30 ) {
+        if( ySpeed < maxSpeed ) {
+          ySpeed += ySpeedIncrease;
+        }
+      } else if( ySpeed > 0 ) {
+        ySpeed -= ySpeedDecrease;
+        if ( ySpeed < 0 ) {
+          ySpeed = 0;
+        }
       }
-      playerGroup.position.x += xSpeed;
+      if( down && playerGroup.position.y > -30 ) {
+        if( ySpeed > -maxSpeed ) {
+          ySpeed -= ySpeedIncrease;
+        }
+      } else if( ySpeed < 0 ) {
+        ySpeed += ySpeedDecrease;
+        if ( ySpeed > 0 ) {
+          ySpeed = 0;
+        }
+      }
     }
 
-    if( up && playerGroup.position.y < 30 ) {
-      if( ySpeed < maxSpeed ) {
-        ySpeed += 0.04;
-      }
-      playerGroup.position.y += ySpeed;
-    } else if( ySpeed > 0 && !up ) {
-      ySpeed -= 0.02;
-      if ( ySpeed < 0 ) {
-        ySpeed = 0;
-      }
-      playerGroup.position.y += ySpeed;
-    }
+    playerGroup.position.x += xSpeed;
+    playerGroup.position.y += ySpeed;
 
-    if( down && playerGroup.position.y > -30 ) {
-      if( ySpeed > -maxSpeed ) {
-        ySpeed -= 0.04;
-      }
-      playerGroup.position.y += ySpeed;
-    } else if( ySpeed < 0 && !down ) {
-      ySpeed += 0.02;
-      if ( ySpeed > 0 ) {
-        ySpeed = 0;
-      }
-      playerGroup.position.y += ySpeed;
-    }
-
-    camera.rotation.y = - playerGroup.position.x / 700 * Math.PI;
+    playerGroup.rotation.y = -xSpeed / 10 * Math.PI;
+    playerGroup.rotation.x = ySpeed / 10 * Math.PI;
+    playerGroup.rotation.z = -xSpeed / 5 * Math.PI;
+    camera.rotation.y = -playerGroup.position.x / 700 * Math.PI;
     camera.position.x = playerGroup.position.x / 1.5;
     camera.rotation.x = playerGroup.position.y / 700 * Math.PI;
     camera.position.y = playerGroup.position.y / 1.5;
@@ -195,6 +223,7 @@ function animate() {
 }
 
 function setPressedKey( event ) {
+  console.log( 'KEY', event.keyCode );
   if( event.keyCode === 65 ) {
     left = true;
   }
