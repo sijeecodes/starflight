@@ -9,23 +9,19 @@ var createPlayer = function() {
     playerGroup.add( object );
   } );
 
-  var geometry = new THREE.BoxGeometry( 6.3, 0.8, 0.8, 2, 2 );
+  var geometry = new THREE.BoxGeometry( 6.3, 0.8, 0.8, 1, 1 );
   var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
   var bodyCollisionCheckBox = new THREE.Mesh( geometry, material );
   bodyCollisionCheckBox.position.set( 0, 0, 0 );
   bodyCollisionCheckBox.rotation.set( 0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI );
-  bodyCollisionCheckBox.geometry.vertices[6] = new THREE.Vector3( -5, 1.4, -2 );
-  bodyCollisionCheckBox.geometry.vertices[7] = new THREE.Vector3( -5, 1.4, 2 );
-  bodyCollisionCheckBox.geometry.vertices[8] = new THREE.Vector3( -5, 0, -2 );
-  bodyCollisionCheckBox.geometry.vertices[9] = new THREE.Vector3( -5, 0, 2 );
-  bodyCollisionCheckBox.geometry.vertices[10] = new THREE.Vector3( -5, -1.5, -2 );
-  bodyCollisionCheckBox.geometry.vertices[11] = new THREE.Vector3( -5, -1.5, 2 );
-  bodyCollisionCheckBox.geometry.vertices[12] = new THREE.Vector3( -2.5, 1.4, -2 );
-  bodyCollisionCheckBox.geometry.vertices[13] = new THREE.Vector3( -2.5, 1.4, 2 );
-  bodyCollisionCheckBox.geometry.vertices[14] = new THREE.Vector3( -2.5, -1.5, 2 );
-  bodyCollisionCheckBox.geometry.vertices[15] = new THREE.Vector3( -2.5, -1.5, -2 );
-  bodyCollisionCheckBox.geometry.vertices[16] = new THREE.Vector3( -2.5, 0, 2 );
-  bodyCollisionCheckBox.geometry.vertices[17] = new THREE.Vector3( -2.5, 0, -2 );
+  bodyCollisionCheckBox.geometry.vertices[0] = new THREE.Vector3( -2.5, 1.4, 2 );
+  bodyCollisionCheckBox.geometry.vertices[1] = new THREE.Vector3( -2.5, 1.4, -2 );
+  bodyCollisionCheckBox.geometry.vertices[2] = new THREE.Vector3( -2.5, -1.5, 2 );
+  bodyCollisionCheckBox.geometry.vertices[3] = new THREE.Vector3( -2.5, -1.5, -2 );
+  bodyCollisionCheckBox.geometry.vertices[4] = new THREE.Vector3( -5, 1.4, -2 );
+  bodyCollisionCheckBox.geometry.vertices[5] = new THREE.Vector3( -5, 1.4, 2 );
+  bodyCollisionCheckBox.geometry.vertices[6] = new THREE.Vector3( -5, -1.5, -2 );
+  bodyCollisionCheckBox.geometry.vertices[7] = new THREE.Vector3( -5, -1.5, 2 );
   bodyCollisionCheckBox.visible = false;
   playerGroup.add( bodyCollisionCheckBox );
 
