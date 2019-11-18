@@ -7,26 +7,41 @@ import createAsteroids from './createAsteroids';
 import updateStars from './updateStars';
 import updateAsteroids from './updateAsteroids';
 import checkCollision from './checkCollision';
+import createBlast from './createBlast';
+import updateBlast from './updateBlast';
+import { setKeyState, resetKeyState } from './setKeyStates';
+import adjustMusic from './adjustMusic';
 
 var container, camera, scene, renderer, hemiLight;
 var gameState = 'ready';
 var gameScore = 0, shield = 100;
-var starGeo, stars, asteroids = [];
+var starGeo, stars, asteroids, playerGroup, ties;
+var blasts = [], blasterDelay = 15;
 var gameScore = 0, scoreTimer = 0, shieldPoint = 30;
 var docTitle, docShield, docScore, docScoreValue, docGameover;
 
 var clock = new THREE.Clock();
-var playerGroup;
-var right = false, left = false, up = false, down = false, spacebar = false;
+var keyStates = {
+  right: false,
+  left: false,
+  up: false,
+  down: false,
+  startGame: false,
+  spacebar: false
+}
+var music = {
+  turnOn: false,
+  volume: 0,
+  bgm: null
+}
 
-var xMaxSpeed = 0.9, yMaxSpeed = 0.7, xSpeed = 0, ySpeed = 0;
-var xSpeedDecrease = 0.03, xSpeedIncrease = 0.05, ySpeedDecrease = 0.02, ySpeedIncrease = 0.04;
+var xMaxSpeed = 1.8, yMaxSpeed = 1.4, xSpeed = 0, ySpeed = 0;
+var xSpeedDecrease = 0.06, xSpeedIncrease = 0.1, ySpeedDecrease = 0.04, ySpeedIncrease = 0.08;
 
 var particleGeometry;
 var particleCount = 100;
 var explosionPower = 1.06;
 var particles;
-var bgm, music = false, audioVolume = 0;
 var explosionSound;
 
 init();
@@ -63,12 +78,12 @@ function init() {
   var listener = new THREE.AudioListener();
   camera.add( listener );
 
-  bgm = new THREE.Audio( listener );
+  music.bgm = new THREE.Audio( listener );
   var audioLoader = new THREE.AudioLoader();
   audioLoader.load( 'bensound-evolution.mp3', function( buffer ) {
-  	bgm.setBuffer( buffer );
-  	bgm.setLoop( true );
-  	bgm.setVolume( audioVolume );
+  	music.bgm.setBuffer( buffer );
+  	music.bgm.setLoop( true );
+  	music.bgm.setVolume( 0 );
   } );
   explosionSound = new THREE.Audio( listener );
   audioLoader.load( 'explosion.wav', function( buffer ) {
@@ -95,22 +110,12 @@ function onWindowResize() {
 function animate() {
   updateStars( starGeo );
   updateAsteroids( asteroids );
-
-  if( !music ) {
-    if( audioVolume > 0 ) {
-      audioVolume -= 0.001;
-      bgm.setVolume( audioVolume );
-      console.log('current volume', audioVolume );
-    }
-    if( audioVolume <= 0 && bgm.isPlaying ) {
-      bgm.stop();
-    }
-  }
+  music = adjustMusic( music, 'adjustVolume' );
 
   if( gameState === 'gameover' || gameState === 'ready') {
     doExplosionLogic();
 
-    if( spacebar ) {
+    if( keyStates.startGame ) {
       docTitle.style.opacity = 0;
       docGameover.style.opacity = 0;
       docShield.style.opacity = 1;
@@ -123,28 +128,14 @@ function animate() {
         shieldHTML += '|';
       }
       docShield.innerHTML = shieldHTML;
-      playerGroup.position.set( 0, 0, -30 );
-      if( !music ) {
-        music = true;
-        audioVolume = 0.5;
-        bgm.setVolume( audioVolume );
-        bgm.play();
-        console.log('music on');
-      }
+      playerGroup.position.set( 0, 0, -25 );
+      music = adjustMusic( music, 'turnOn' );
       scene.add( playerGroup );
       gameState = 'playing';
     }
   }
 
   if( gameState === 'playing' ) {
-    if( !music ) {
-      music = true;
-      audioVolume = 0.5;
-      bgm.setVolume( audioVolume );
-      bgm.play();
-      console.log('music on');
-    }
-
     var explodePosition = checkCollision( playerGroup, asteroids );
     if( explodePosition ) {
       explode( explodePosition );
@@ -152,6 +143,7 @@ function animate() {
         explosionSound.stop();
       }
       explosionSound.play();
+
       shieldPoint -= 10;
       if( shieldPoint >= 0 ) {
         var shieldHTML = '';
@@ -159,19 +151,17 @@ function animate() {
           shieldHTML += '|';
         }
         docShield.innerHTML = shieldHTML;
+
       } else {
         scene.remove( playerGroup );
         docGameover.style.opacity = 1;
+        music = adjustMusic( music, 'turnOff' );
         gameState = 'gameover';
-        if( music ) {
-          music = false;
-        }
       }
-
     }
     doExplosionLogic();
 
-    if( left && right ) {
+    if( keyStates.left && keyStates.right ) {
       if( xSpeed < 0 ) {
         xSpeed += xSpeedDecrease;
         if ( xSpeed > 0 ) {
@@ -184,7 +174,7 @@ function animate() {
         }
       }
     } else {
-      if( left && playerGroup.position.x > -80 ) {
+      if( keyStates.left && playerGroup.position.x > -120 ) {
         if( xSpeed > -xMaxSpeed ) {
           xSpeed -= xSpeedIncrease;
         }
@@ -194,7 +184,7 @@ function animate() {
           xSpeed = 0;
         }
       }
-      if( right && playerGroup.position.x < 80 ) {
+      if( keyStates.right && playerGroup.position.x < 120 ) {
         if( xSpeed < xMaxSpeed ) {
           xSpeed += xSpeedIncrease;
         }
@@ -206,7 +196,7 @@ function animate() {
       }
     }
 
-    if( up && down ) {
+    if( keyStates.up && keyStates.down ) {
       if( ySpeed > 0 ) {
         ySpeed -= ySpeedDecrease;
         if ( ySpeed < 0 ) {
@@ -219,7 +209,7 @@ function animate() {
         }
       }
     } else {
-      if( up && playerGroup.position.y < 30 ) {
+      if( keyStates.up && playerGroup.position.y < 40 ) {
         if( ySpeed < yMaxSpeed ) {
           ySpeed += ySpeedIncrease;
         }
@@ -229,7 +219,7 @@ function animate() {
           ySpeed = 0;
         }
       }
-      if( down && playerGroup.position.y > -30 ) {
+      if( keyStates.down && playerGroup.position.y > -40 ) {
         if( ySpeed > -yMaxSpeed ) {
           ySpeed -= ySpeedIncrease;
         }
@@ -240,16 +230,21 @@ function animate() {
         }
       }
     }
+    if( keyStates.spacebar && blasterDelay === 20 ) {
+      blasts.push( createBlast( playerGroup.position, xSpeed, ySpeed ) );
+      scene.add( blasts[ blasts.length - 1 ] );
+      blasterDelay = 0;
+    }
 
     playerGroup.position.x += xSpeed;
     playerGroup.position.y += ySpeed;
-    playerGroup.rotation.y = -xSpeed / 10 * Math.PI;
-    playerGroup.rotation.x = ySpeed / 10 * Math.PI;
-    playerGroup.rotation.z = -xSpeed / 5 * Math.PI;
-    camera.rotation.y = -playerGroup.position.x / 700 * Math.PI;
-    camera.position.x = playerGroup.position.x / 1.5;
-    camera.rotation.x = playerGroup.position.y / 700 * Math.PI;
-    camera.position.y = playerGroup.position.y / 1.5;
+    playerGroup.rotation.x = ySpeed / 20 * Math.PI;
+    playerGroup.rotation.y = -xSpeed / 20 * Math.PI;
+    playerGroup.rotation.z = -xSpeed / 10 * Math.PI;
+    camera.rotation.x = playerGroup.position.y / 1400 * Math.PI;
+    camera.rotation.y = -playerGroup.position.x / 1400 * Math.PI;
+    camera.position.x = playerGroup.position.x / 1.15;
+    camera.position.y = playerGroup.position.y / 1.15;
 
     scoreTimer++;
     if( scoreTimer >= 20 ) {
@@ -259,45 +254,22 @@ function animate() {
     }
   }
 
+  if( blasterDelay < 20 ) {
+    blasterDelay++;
+  }
+  if( blasts.length > 0 ) {
+    for( var i = 0; i < blasts.length; i++ ) {
+      updateBlast( blasts[i] );
+      if( blasts[i].position.z < -2000 ) {
+        blasts.splice( blasts.indexOf( blasts[i] ), 1 );
+      }
+    }
+  }
+
   renderer.render( scene, camera );
   requestAnimationFrame( animate );
 }
 
-function setPressedKey( event ) {
-  if( event.keyCode === 65 ) {
-    left = true;
-  }
-  if( event.keyCode === 68 ) {
-    right = true;
-  }
-  if( event.keyCode === 87 ) {
-    up = true;
-  }
-  if( event.keyCode === 83 ) {
-    down = true;
-  }
-  if( event.keyCode === 32 ) {
-    spacebar = true;
-  }
-}
-
-function resetPressedKey( event ) {
-  if( event.keyCode === 65 ) {
-    left = false;
-  }
-  if( event.keyCode === 68 ) {
-    right = false;
-  }
-  if( event.keyCode === 87 ) {
-    up = false;
-  }
-  if( event.keyCode === 83 ) {
-    down = false;
-  }
-  if( event.keyCode === 32 ) {
-    spacebar = false;
-  }
-}
 function addExplosion() {
 	particleGeometry = new THREE.Geometry();
 	for (var i = 0; i < particleCount; i ++ ) {
@@ -344,4 +316,12 @@ function explode( explodePosition ) {
 	}
 	explosionPower = 1.1;
 	particles.visible = true;
+}
+
+function setPressedKey( event ) {
+  keyStates = setKeyState( keyStates, event );
+}
+
+function resetPressedKey( event ) {
+  keyStates = resetKeyState( keyStates, event );
 }

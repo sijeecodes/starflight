@@ -6,8 +6,10 @@ var checkCollision = function( playerGroup, asteroids ) {
   var originPoint = playerGroup.position.clone();
 
   asteroids.children.forEach( function( asteroid ) {
-    if( asteroid.position.distanceTo(playerGroup.position) < 150 ) {
-      collidableMeshList.push(asteroid.children[0]);
+    if( asteroid.position.z > -300 ) {
+      if( asteroid.position.distanceTo(playerGroup.position) < 150 ) {
+        collidableMeshList.push(asteroid.children[0]);
+      }
     }
   } );
 

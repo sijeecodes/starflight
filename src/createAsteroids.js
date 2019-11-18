@@ -5,7 +5,7 @@ import { OBJLoader } from './libs/OBJLoader';
 var createAsteroids = function() {
   var asteroids = new THREE.Object3D();
 
-  for( var i = 0; i < 300; i++ ) {
+  for( var i = 0; i < 400; i++ ) {
     var loader = new OBJLoader()
     var type = Math.floor( Math.random() * 10 % 3 );
     loader.load('models/asteroid' + type + '.obj',
@@ -22,24 +22,25 @@ var createAsteroids = function() {
             }
         } );
         asteroid.scale.set(
-          Math.random() * 40 + 40,
-          Math.random() * 40 + 40,
-          Math.random() * 40 + 40
+          ( Math.random() * 10 / 3 + 1 ) * 23,
+          ( Math.random() * 10 / 3 + 1 ) * 23,
+          ( Math.random() * 10 / 3 + 1 ) * 23
         );
         asteroid.position.set(
           Math.random() * 1000 - 500,
           Math.random() * 1000 - 500,
-          -Math.random() * 40000
+          -4000 / Math.random() + 200
         );
-        asteroid.velocity = Math.random() * 20 + 1;
+        // asteroid.velocity = ( Math.random() * 10 / 5 ) + 16;
+        asteroid.velocity = Math.random() + 15;
         asteroid.rotate = new THREE.Vector3(
           Math.random() * 0.02,
           Math.random() * 0.02,
           Math.random() * 0.02
         );
         asteroid.xyMove = new THREE.Vector2(
-          ( Math.random() - 0.5 ) * 2,
-          ( Math.random() - 0.5 ) * 2
+          ( Math.random() - 0.5 ) * 3,
+          ( Math.random() - 0.5 ) * 3
         );
         asteroids.add( asteroid );
       }

@@ -42,7 +42,7 @@ var createPlayer = function() {
   playerGroup.add( wingCollisionCheckPlane2 );
 
   playerGroup.scale.set( 0.35, 0.35, 0.35 );
-  playerGroup.position.set( 0, 0, -30 );
+  playerGroup.position.set( 0, 0, -25 );
 
   return playerGroup;
 };
