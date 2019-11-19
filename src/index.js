@@ -13,14 +13,15 @@ import updateBlast from './updateBlast';
 import { setKeyState, resetKeyState } from './setKeyStates';
 import adjustMusic from './adjustMusic';
 
-var container, camera, scene, renderer, hemiLight;
+var container, camera, scene, renderer, hemiLight, doc;
 var gameState = 'gameover', gameStartDelay = 150;
 var gameScore = 0, shield = 100, hitFlashCounter = 0;
-var starGeo, stars, asteroids, playerGroup, ties;
+var starGeo, asteroids, playerGroup;
 var blasts = [], blasterDelay = 15;
 var gameScore = 0, scoreTimer = 0, shieldPoint = 30, shieldRechargeCounter, shieldMax = 35;
-var doc;
-
+var xMaxSpeed = 1.8, yMaxSpeed = 1.4, xSpeed = 0, ySpeed = 0;
+var xSpeedDecrease = 0.06, xSpeedIncrease = 0.1, ySpeedDecrease = 0.04, ySpeedIncrease = 0.08;
+var particleGeometry, particleCount = 100, explosionPower = 1.06, particles, explosionSound;
 var clock = new THREE.Clock();
 var keyStates = {
   right: false,
@@ -36,15 +37,6 @@ var music = {
   volume: 0,
   bgm: null
 }
-
-var xMaxSpeed = 1.8, yMaxSpeed = 1.4, xSpeed = 0, ySpeed = 0;
-var xSpeedDecrease = 0.06, xSpeedIncrease = 0.1, ySpeedDecrease = 0.04, ySpeedIncrease = 0.08;
-
-var particleGeometry;
-var particleCount = 100;
-var explosionPower = 1.06;
-var particles;
-var explosionSound;
 
 init();
 
@@ -122,11 +114,7 @@ function animate() {
       gameScore = 0;
       shieldPoint = 30;
       shieldRechargeCounter = 0;
-      var shieldHTML = '';
-      for( var i = 0; i < shieldPoint; i++ ) {
-        shieldHTML += '|';
-      }
-      doc.shield.innerHTML = shieldHTML;
+      updateShieldUI();
       playerGroup.position.set( 0, 0, -25 );
       music = adjustMusic( music, 'turnOn' );
       scene.add( playerGroup );
@@ -149,11 +137,7 @@ function animate() {
       if( shieldRechargeCounter >= 120 ) {
         shieldRechargeCounter = 0;
         shieldPoint++;
-        var shieldHTML = '';
-        for( var i = 0; i < shieldPoint; i++ ) {
-          shieldHTML += '|';
-        }
-        doc.shield.innerHTML = shieldHTML;
+        updateShieldUI();
       }
     }
     if( keyStates.refill ) {
@@ -177,11 +161,7 @@ function animate() {
 
       shieldPoint -= 10;
       if( shieldPoint >= 0 ) {
-        var shieldHTML = '';
-        for( var i = 0; i < shieldPoint; i++ ) {
-          shieldHTML += '|';
-        }
-        doc.shield.innerHTML = shieldHTML;
+        updateShieldUI();
       } else {
         scene.remove( playerGroup );
         doc.gameover.style.opacity = 1;
@@ -346,7 +326,7 @@ function explode( explodePosition ) {
 		vertex.z = Math.random() * 0.4 - 0.2;
 		particleGeometry.vertices[i] = vertex;
 	}
-	explosionPower = 1.1;
+	explosionPower = Math.random() / 3 + 1.06;
 	particles.visible = true;
 }
 
@@ -372,4 +352,12 @@ function updateHitFlash( flag ) {
       doc.hitFlash.style.opacity = doc.hitFlash.style.opacity / hitFlashCounter;
     }
   }
+}
+
+function updateShieldUI() {
+  var shieldHTML = '';
+  for( var i = 0; i < shieldPoint; i++ ) {
+    shieldHTML += '|';
+  }
+  doc.shield.innerHTML = shieldHTML;
 }
