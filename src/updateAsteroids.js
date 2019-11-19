@@ -12,7 +12,6 @@ var updateAsteroids = function( asteroids, hit ) {
         -4000
       );
       asteroid.velocity = Math.random() + 10;
-      // asteroid.velocity = ( Math.random() * 2 ) + 4;
     } else {
       asteroid.rotation.x += asteroid.rotate.x;
       asteroid.rotation.y += asteroid.rotate.y;

@@ -22,14 +22,14 @@ var createAsteroids = function() {
             }
         } );
         asteroid.scale.set(
-          ( Math.random() * 10 / 3 + 1 ) * 23,
-          ( Math.random() * 10 / 3 + 1 ) * 23,
-          ( Math.random() * 10 / 3 + 1 ) * 23
+          ( Math.random() * 10 / 3 + 1 ) * 21,
+          ( Math.random() * 10 / 3 + 1 ) * 21,
+          ( Math.random() * 10 / 3 + 1 ) * 21
         );
         asteroid.position.set(
           Math.random() * 1000 - 500,
           Math.random() * 1000 - 500,
-          -4000 / Math.random() + 200
+          -4000 / Math.random()
         );
         // asteroid.velocity = ( Math.random() * 10 / 5 ) + 16;
         asteroid.velocity = Math.random() + 15;

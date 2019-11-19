@@ -17,7 +17,9 @@ var setKeyState = function( keyStates, event ) {
   if( event.keyCode === 32 ) {
     keyStates.spacebar = true;
   }
-
+  if( event.keyCode === 191 ) {
+    keyStates.refill = true;
+  }
   return keyStates;
 }
 
@@ -40,7 +42,9 @@ var resetKeyState = function( keyStates, event ) {
   if( event.keyCode === 32 ) {
     keyStates.spacebar = false;
   }
-  
+  if( event.keyCode === 191 ) {
+    keyStates.refill = false;
+  }
   return keyStates;
 }
 

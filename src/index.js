@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OBJLoader } from './libs/OBJLoader';
+import documents from './documents';
 import createDirectLight from './createDirectLight';
 import { createStarGeo, createStarMaterial } from './createStars';
 import createPlayer from './createPlayer';
@@ -13,12 +14,12 @@ import { setKeyState, resetKeyState } from './setKeyStates';
 import adjustMusic from './adjustMusic';
 
 var container, camera, scene, renderer, hemiLight;
-var gameState = 'ready';
-var gameScore = 0, shield = 100;
+var gameState = 'gameover', gameStartDelay = 150;
+var gameScore = 0, shield = 100, hitFlashCounter = 0;
 var starGeo, stars, asteroids, playerGroup, ties;
 var blasts = [], blasterDelay = 15;
-var gameScore = 0, scoreTimer = 0, shieldPoint = 30;
-var docTitle, docShield, docScore, docScoreValue, docGameover;
+var gameScore = 0, scoreTimer = 0, shieldPoint = 30, shieldRechargeCounter, shieldMax = 35;
+var doc;
 
 var clock = new THREE.Clock();
 var keyStates = {
@@ -27,7 +28,8 @@ var keyStates = {
   up: false,
   down: false,
   startGame: false,
-  spacebar: false
+  spacebar: false,
+  refill: false
 }
 var music = {
   turnOn: false,
@@ -47,7 +49,7 @@ var explosionSound;
 init();
 
 function init() {
-  container = document.createElement( 'div' );
+  container = document.getElementById( 'root' );
   document.body.appendChild( container );
 
   scene = new THREE.Scene();
@@ -73,6 +75,7 @@ function init() {
   window.addEventListener( 'resize', onWindowResize, false );
   window.addEventListener( 'keydown', setPressedKey );
   window.addEventListener( 'keyup', resetPressedKey );
+  doc = documents();
 
   // create an AudioListener and add it to the camera
   var listener = new THREE.AudioListener();
@@ -92,12 +95,6 @@ function init() {
     explosionSound.setVolume( 0.6 );
   } );
 
-  docTitle = document.getElementById('title');
-  docShield = document.getElementById('shield');
-  docScore = document.getElementById('score');
-  docScoreValue = document.getElementById('score-value');
-  docGameover = document.getElementById('gameover');
-
   window.onload = animate();
 }
 
@@ -110,34 +107,68 @@ function onWindowResize() {
 function animate() {
   updateStars( starGeo );
   updateAsteroids( asteroids );
+  updateHitFlash( 'update' );
   music = adjustMusic( music, 'adjustVolume' );
 
-  if( gameState === 'gameover' || gameState === 'ready') {
+  if( gameState === 'gameover' ) {
     doExplosionLogic();
 
     if( keyStates.startGame ) {
-      docTitle.style.opacity = 0;
-      docGameover.style.opacity = 0;
-      docShield.style.opacity = 1;
-      docScore.style.opacity = 1;
-      docScoreValue.innerHTML = 0;
+      doc.title.style.opacity = 0;
+      doc.gameover.style.opacity = 0;
+      doc.shield.style.opacity = 1;
+      doc.score.style.opacity = 1;
+      doc.scoreValue.innerHTML = 0;
       gameScore = 0;
       shieldPoint = 30;
+      shieldRechargeCounter = 0;
       var shieldHTML = '';
       for( var i = 0; i < shieldPoint; i++ ) {
         shieldHTML += '|';
       }
-      docShield.innerHTML = shieldHTML;
+      doc.shield.innerHTML = shieldHTML;
       playerGroup.position.set( 0, 0, -25 );
       music = adjustMusic( music, 'turnOn' );
       scene.add( playerGroup );
+      gameState = 'ready';
+    }
+  }
+
+  if( gameState === 'ready' ) {
+    doExplosionLogic();
+    gameStartDelay--;
+    if( gameStartDelay <= 0 ) {
+      gameStartDelay = 150;
       gameState = 'playing';
     }
   }
 
   if( gameState === 'playing' ) {
+    if( shieldPoint <= shieldMax ) {
+      shieldRechargeCounter++;
+      if( shieldRechargeCounter >= 120 ) {
+        shieldRechargeCounter = 0;
+        shieldPoint++;
+        var shieldHTML = '';
+        for( var i = 0; i < shieldPoint; i++ ) {
+          shieldHTML += '|';
+        }
+        doc.shield.innerHTML = shieldHTML;
+      }
+    }
+    if( keyStates.refill ) {
+      shieldRechargeCounter = 0;
+      shieldPoint = shieldMax;
+      var shieldHTML = '';
+      for( var i = 0; i < shieldPoint; i++ ) {
+        shieldHTML += '|';
+      }
+      doc.shield.innerHTML = shieldHTML;
+    }
+
     var explodePosition = checkCollision( playerGroup, asteroids );
     if( explodePosition ) {
+      updateHitFlash( 'hit' );
       explode( explodePosition );
       if( explosionSound.isPlaying ){
         explosionSound.stop();
@@ -150,17 +181,19 @@ function animate() {
         for( var i = 0; i < shieldPoint; i++ ) {
           shieldHTML += '|';
         }
-        docShield.innerHTML = shieldHTML;
-
+        doc.shield.innerHTML = shieldHTML;
       } else {
         scene.remove( playerGroup );
-        docGameover.style.opacity = 1;
+        doc.gameover.style.opacity = 1;
+        doc.shield.innerHTML = '';
         music = adjustMusic( music, 'turnOff' );
         gameState = 'gameover';
       }
     }
     doExplosionLogic();
+  }
 
+  if( gameState === 'ready' || gameState === 'playing') {
     if( keyStates.left && keyStates.right ) {
       if( xSpeed < 0 ) {
         xSpeed += xSpeedDecrease;
@@ -235,7 +268,6 @@ function animate() {
       scene.add( blasts[ blasts.length - 1 ] );
       blasterDelay = 0;
     }
-
     playerGroup.position.x += xSpeed;
     playerGroup.position.y += ySpeed;
     playerGroup.rotation.x = ySpeed / 20 * Math.PI;
@@ -250,7 +282,7 @@ function animate() {
     if( scoreTimer >= 20 ) {
       scoreTimer = 0;
       gameScore++;
-      docScoreValue.innerHTML = gameScore;
+      doc.scoreValue.innerHTML = gameScore;
     }
   }
 
@@ -324,4 +356,20 @@ function setPressedKey( event ) {
 
 function resetPressedKey( event ) {
   keyStates = resetKeyState( keyStates, event );
+}
+
+function updateHitFlash( flag ) {
+  if( flag === 'hit' ) {
+    hitFlashCounter = 30;
+    doc.hitFlash.style.opacity = 1;
+  }
+  if( flag === 'update' ) {
+    if( hitFlashCounter <= 0 ) {
+      doc.hitFlash.style.opacity = 0;
+    }
+    if( hitFlashCounter > 0 ) {
+      hitFlashCounter--;
+      doc.hitFlash.style.opacity = doc.hitFlash.style.opacity / hitFlashCounter;
+    }
+  }
 }
