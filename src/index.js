@@ -291,7 +291,7 @@ function addExplosion() {
   var sprite = new THREE.TextureLoader().load( 'models/explosion.png' );
   var pMaterial = new THREE.ParticleBasicMaterial( {
     color: 0xffffff,
-    size: 0.5,
+    size: Math.random() * 0.8 + 0.4,
     map: sprite,
     transparent: true
   } );
@@ -326,7 +326,7 @@ function explode( explodePosition ) {
 		vertex.z = Math.random() * 0.4 - 0.2;
 		particleGeometry.vertices[i] = vertex;
 	}
-	explosionPower = Math.random() / 3 + 1.06;
+	explosionPower = Math.random() / 4 + 1.085;
 	particles.visible = true;
 }
 
