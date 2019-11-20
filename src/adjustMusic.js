@@ -14,7 +14,7 @@ var adjustMusic = function( { turnOn, volume, bgm }, action ) {
     case 'turnOn':
       if( !turnOn ) {
         turnOn = true;
-        volume = 0.5;
+        volume = 0.3;
         bgm.setVolume( volume );
         bgm.play();
       }

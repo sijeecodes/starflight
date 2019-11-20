@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import { FBXLoader } from './libs/FBXLoader';
 
-var createPlayer = function() {
+var createPlayer = function( shipLoad ) {
   var playerGroup = new THREE.Group();
   var loader = new FBXLoader();
   loader.load( 'models/X.fbx', function ( object ) {
     object.castShadow = true;
     playerGroup.add( object );
+    shipLoad( 'loaded' );
   } );
 
   var geometry = new THREE.BoxGeometry( 6.3, 0.8, 0.8, 1, 1 );

@@ -32,7 +32,6 @@ var checkCollision = function( playerGroup, asteroids ) {
               && initializedAsteroids.indexOf( collisionResults[j].object.uuid ) === -1 ) {
               updateAsteroids( collisionResults[j].object.parent, 'Hit' );
               initializedAsteroids.push( collisionResults[j].object.uuid );
-              console.log('hit', originPoint, collisionResults[j] );
               return collisionResults[j].point;
             }
           }
