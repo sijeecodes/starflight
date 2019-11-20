@@ -190,7 +190,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\nvar documents = function() {\n  var doc = {\n    title: document.getElementById( 'title' ),\n    shield: document.getElementById( 'shield' ),\n    score: document.getElementById( 'score' ),\n    scoreValue: document.getElementById( 'score-value' ),\n    gameover: document.getElementById( 'gameover' ),\n    hitFlash: document.getElementById( 'hit-flash' )\n  }\n  return doc;\n}\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (documents);\n\n\n//# sourceURL=webpack:///./src/documents.js?");
+eval("__webpack_require__.r(__webpack_exports__);\nvar documents = function() {\n  var doc = {\n    title: document.getElementById( 'title' ),\n    shield: document.getElementById( 'shield' ),\n    score: document.getElementById( 'score' ),\n    scoreValue: document.getElementById( 'score-value' ),\n    gameOver: document.getElementById( 'gameOver' ),\n    hitFlash: document.getElementById( 'hit-flash' )\n  }\n  return doc;\n}\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (documents);\n\n\n//# sourceURL=webpack:///./src/documents.js?");
 
 /***/ }),
 

@@ -4,7 +4,7 @@ var documents = function() {
     shield: document.getElementById( 'shield' ),
     score: document.getElementById( 'score' ),
     scoreValue: document.getElementById( 'score-value' ),
-    gameover: document.getElementById( 'gameover' ),
+    gameOver: document.getElementById( 'gameOver' ),
     hitFlash: document.getElementById( 'hit-flash' )
   }
   return doc;
