@@ -2,20 +2,20 @@ import * as THREE from 'three';
 import { OBJLoader } from './libs/OBJLoader';
 import documents from './documents';
 import createDirectLight from './createDirectLight';
-import { createStarGeo, createStarMaterial } from './createStars';
 import createPlayer from './createPlayer';
 import createAsteroids from './createAsteroids';
+import createBlast from './createBlast';
+import { createStarGeo, createStarMaterial } from './createStars';
 import updateStars from './updateStars';
 import updateAsteroids from './updateAsteroids';
-import checkCollision from './checkCollision';
-import createBlast from './createBlast';
 import updateBlast from './updateBlast';
-import { setKeyState, resetKeyState } from './setKeyStates';
 import adjustMusic from './adjustMusic';
+import checkCollision from './checkCollision';
+import { setKeyState, resetKeyState } from './setKeyStates';
 
 var gameLogic = function() {
   var container, camera, scene, renderer, hemiLight, doc;
-  var gameState = 'gameover', gameStartDelay = 150;
+  var gameState = 'gameOver', gameStartDelay = 150;
   var gameScore = 0, shield = 100, hitFlashCounter = 0;
   var starGeo, asteroids, playerGroup, shipLoaded = false;
   var blasts = [], blasterDelay = 15;
@@ -104,12 +104,12 @@ var gameLogic = function() {
     music = adjustMusic( music, 'adjustVolume' );
 
     if( shipLoaded ) {
-      if( gameState === 'gameover' ) {
+      if( gameState === 'gameOver' ) {
         doExplosionLogic();
 
         if( keyStates.startGame ) {
           doc.title.style.opacity = 0;
-          doc.gameover.style.opacity = 0;
+          doc.gameOver.style.opacity = 0;
           doc.shield.style.opacity = 1;
           doc.score.style.opacity = 1;
           doc.scoreValue.innerHTML = 0;
@@ -166,10 +166,10 @@ var gameLogic = function() {
             updateShieldUI();
           } else {
             scene.remove( playerGroup );
-            doc.gameover.style.opacity = 1;
+            doc.gameOver.style.opacity = 1;
             doc.shield.innerHTML = '';
             music = adjustMusic( music, 'turnOff' );
-            gameState = 'gameover';
+            gameState = 'gameOver';
           }
         }
         doExplosionLogic();
@@ -287,7 +287,7 @@ var gameLogic = function() {
 
   function addExplosion() {
   	particleGeometry = new THREE.Geometry();
-  	for (var i = 0; i < particleCount; i ++ ) {
+  	for ( var i = 0; i < particleCount; i ++ ) {
   		var vertex = new THREE.Vector3();
   		particleGeometry.vertices.push( vertex );
   	}
@@ -308,7 +308,7 @@ var gameLogic = function() {
       return;
     }
   	for( var i = 0; i < particleCount; i ++ ) {
-  		particleGeometry.vertices[i].multiplyScalar(explosionPower);
+  		particleGeometry.vertices[i].multiplyScalar( explosionPower );
   	}
   	if( explosionPower > 1.03 ) {
   		explosionPower -= 0.001;

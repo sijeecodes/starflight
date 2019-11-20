@@ -10,12 +10,12 @@ var createAsteroids = function() {
     var type = Math.floor( Math.random() * 10 % 3 );
     loader.load('models/asteroid' + type + '.obj',
       function( asteroid ) {
-        var texture = new THREE.TextureLoader().load('models/asteroidTexture.jpg');
+        var texture = new THREE.TextureLoader().load( 'models/asteroidTexture.jpg' );
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set( 2, 2 );
 
-        asteroid.traverse(function ( child ) {
+        asteroid.traverse( function ( child ) {
             if ( child instanceof THREE.Mesh ) {
                 child.material = new THREE.MeshLambertMaterial( { side: THREE.DoubleSide });
                 child.material.map = texture;

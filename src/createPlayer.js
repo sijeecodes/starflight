@@ -11,7 +11,7 @@ var createPlayer = function( shipLoad ) {
   } );
 
   var geometry = new THREE.BoxGeometry( 6.3, 0.8, 0.8, 1, 1 );
-  var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+  var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
   var bodyCollisionCheckBox = new THREE.Mesh( geometry, material );
   bodyCollisionCheckBox.position.set( 0, 0, 0 );
   bodyCollisionCheckBox.rotation.set( 0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI );
@@ -27,7 +27,7 @@ var createPlayer = function( shipLoad ) {
   playerGroup.add( bodyCollisionCheckBox );
 
   geometry = new THREE.PlaneGeometry( 10, 2, 1 );
-  material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+  material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
   var wingCollisionCheckPlane1 = new THREE.Mesh( geometry, material );
   wingCollisionCheckPlane1.position.set( 0, -0.1, 4 );
   wingCollisionCheckPlane1.rotation.x = 0.5 * Math.PI;
