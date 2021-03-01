@@ -3,7 +3,7 @@
     "build": "webpack"
   },
   "dependencies": {
-    "three": "^0.110.0"
+    "three": "^0.125.0"
   },
   "devDependencies": {
     "webpack": "^4.41.2",
