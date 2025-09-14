@@ -1,7 +1,7 @@
 # StarFlight
 
  - A simple dodge the rock space flight game
- - Play link: https://cocky-aryabhata-d7d419.netlify.com/
+ - Play link: https://cocky-aryabhata-d7d419.netlify.app/
 
 ![playVideo](./starflightplay.gif)
 
